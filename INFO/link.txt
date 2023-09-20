@@ -1,0 +1,11 @@
+IGDB structure:
+https://api-docs.igdb.com/#endpoints
+
+DB Browser for SQLite (Windows, macOS, Linux, FreeBSD):
+https://sqlitebrowser.org/dl/
+
+SQLite optimization:
+https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
+
+sqlean.py a SQLite Python wrapper:
+https://github.com/nalgeon/sqlean.py#sqleanpy
