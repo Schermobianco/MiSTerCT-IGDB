@@ -1,0 +1,20 @@
+*.xlsx
+*.xlsm
+*.csv
+*.sav
+*.emb
+*.mod
+*.db
+/venv/**
+/__pycache__/**
+/.vscode/**
+/build/**
+/dist/**
+/model/**
+/Tools/**
+/esempi/**
+desktop.ini
+pyRW_UDT.spec
+/Pack/__pycache__/**
+changelog.txt
+create changelog.ps1
