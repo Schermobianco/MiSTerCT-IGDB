@@ -3,6 +3,8 @@ import os
 import sys
 import shutil
 
+from pack.fun import *
+from pack.api_igdb import *
 
 from datetime import datetime
 import joblib
@@ -13,24 +15,6 @@ import time
 import re
 #from thefuzz import process
 from rapidfuzz import process, fuzz, utils
-
-from pack.fun import *
-from pack.api_igdb import *
-
-from sentence_transformers import SentenceTransformer, util
-import torch
-
-
-import pandas as pd
-import numpy as np
-import faiss
-from fuzzywuzzy import fuzz
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from transformers import AutoTokenizer, AutoModel
-import tensorflow as tf
-import tensorflow_hub as hub
 
 threadList = []
 
@@ -107,70 +91,6 @@ exclusion = '(pirate)','(proto)'
 
 wrapper = IGDBWrapper("ltoj7yg0pb1t32gxtvph876ojyp12d", "qb3lm8ls99u2kux3se4z4wk3501pc8")
 
-class FuzzySemanticSearch:
-    def __init__(self, dataset, model_name):
-
-        self.dataset = dataset
-
-        # Path where to save the model
-        saved_model_path = "model"
-
-        try:
-            self.embed = hub.load(saved_model_path)
-        except:
-            self.embed = hub.load(model_name)
-
-        # Save TF Hub model to custom folder path
-        tf.saved_model.save(self.embed, saved_model_path)
-        
-        self.vectors = self.get_embedding()
-        self.index = faiss.IndexFlatIP(self.vectors.shape[-1])
-
-
-
-    def preprocess_text(self, text):
-        stop_words = set(stopwords.words('english'))
-        tokens = word_tokenize(text)
-        tokens = [token.lower() for token in tokens if token.isalpha() and token.lower() not in stop_words]
-        return ' '.join(tokens)
-
-    def encode_text(self, text):
-        embedding = self.embed([text]).numpy()
-        return embedding
-
-    def get_embedding(self):
-        embeddings = []
-        for text in self.dataset['text']:
-            #preprocessed_text = self.preprocess_text(text)
-            #embedding = self.encode_text(preprocessed_text)
-            embedding = self.encode_text(text)
-            embeddings.append(embedding)
-        embeddings = np.concatenate(embeddings, axis=0)
-        return embeddings
-
-    def build_index(self):
-        embeddings = np.array(self.vectors)
-        self.index.add(embeddings)
-
-    def search(self, query, k=1, threshold=0):
-        preprocessed_query = self.preprocess_text(query)
-        embedding = self.encode_text(preprocessed_query)
-        distances, indices = self.index.search(embedding.reshape(1, -1), k)
-        results = []
-        for distance, index in zip(distances[0], indices[0]):
-            text = self.dataset.iloc[index]['text']
-            score = fuzz.token_sort_ratio(preprocessed_query, self.preprocess_text(text))
-            if score >= threshold:
-                results.append({'text': text, 'score': score, 'distance': distance})
-                out = 'AI '+ results[0]['text'],results[0]['score']
-
-            else:
-                out = None
-        #results = sorted(results, key=lambda x: (x['distance'], x['score']), reverse=True)[:k]
-
-
-        return out
-
 # def createFolder(foldername):
 #     if not os.path.exists(subfolder + '/' + foldername):
 #         os.makedirs(subfolder + '/' + foldername)
@@ -231,83 +151,6 @@ def searchLocalFuzzy(sourceList, search: str, cutoff) -> str:
         out = process.extractOne(search, sourceList, score_cutoff=cutoff)
 
         return out
-
-def initTransf():
-    # Carica il modello e lo sposta sulla GPU
-    device = 'cuda' if torch.cuda.is_available() else 'cpu:0'
-    model = SentenceTransformer('stsb-roberta-large')
-    modelPath = "model"
-    model.save(modelPath)
-    model = SentenceTransformer(modelPath)
-    model.to(device)
-
-    return model,device
-
-def embTransf(model,device,sourceList,name = None):
-    
-    if name != None:
-        pre = name
-        ext = '.emb'
-        filename = pre + ext
-
-        try:
-            lout = joblib.load(filename)
-            #exportListCSV(lout,pre + '.csv')
-            return lout
-        except:
-            lout = []
-    else:
-        lout = []
-
-    # # Carica il modello e lo sposta sulla GPU
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu:0'
-    # model = SentenceTransformer('stsb-roberta-large')
-    # modelPath = "model"
-    # model.save(modelPath)
-    # model = SentenceTransformer(modelPath)
-    # model.to(device)
-
-    # Calcola l'embedding di ogni testo nella lista
-    lout = model.encode(sourceList, convert_to_tensor=True, show_progress_bar=True, device=device)
-
-    if name != None: joblib.dump(lout, filename)
-
-    return lout
-
-def initFuzzSem(list):
-    #nltk.download('stopwords')
-
-    #nltk.download('punkt')
-
-    model_name = 'https://tfhub.dev/google/universal-sentence-encoder-large/5'
-
-    dataset = pd.DataFrame({'text': list})
-
-    fuzzy_semantic_search = FuzzySemanticSearch(dataset, model_name)
-
-    fuzzy_semantic_search.build_index()
-
-    return fuzzy_semantic_search
-
-
-
-def bestTrasf(emb1,emb2,list2,cutout):
-
-    sim_scores = util.pytorch_cos_sim(emb1, emb2)[0]
-
-    # Trova il testo più simile nella lista 2
-    top_idx = torch.argmax(sim_scores)
-
-    sim_score = sim_scores[top_idx]
-
-    score = round(sim_score.item()*100,2)
-
-    if score >= cutout:
-        lout = list2[top_idx],'AI ' + str(int(score))
-    else:
-        lout = None
-
-    return lout
 
 
 def getElementFromList(list,tosearch,value,toget):
@@ -461,10 +304,13 @@ if __name__ == "__main__":
     # exit()
 
 
+    # tratto la lista di testi dove cercare
     psl = prepareList(sl,'name')
     
+    # carico file da directory
     #files = getFileList(path_source)
    
+    # carico file da txt
     files = getFileFromTxt('SNES.txt')
 
     prev = ''
@@ -473,23 +319,25 @@ if __name__ == "__main__":
 
     myfile = open('output.csv', 'w', newline='', encoding="utf-8-sig")
 
-    # --- PER ESPORTAZIONE CSV
+    # --- HEADER PER ESPORTAZIONE CSV
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL,delimiter =';')
     header = 'NOME FILE','STRINGA CERCATA','ID','NOME','PUNTEGGIO DI RICERCA','REGION','DATA','GENERE','PUB','DEV'
     wr.writerow(header)
     # ---
-    # model, device = initTransf()
-    # embDB = embTransf(model, device, [d['name'] for d in psl],'simple' + str(platform))
 
-    fs = initFuzzSem([d['name'] for d in psl])
 
     for f in files:
         
+        # escludo tutto quello che trovo dopo "("
+
         gname = f.split('(',1)
 
         fregion = getFileRegion(f)
         gname = gname[0]
-        gname = prepareList(gname)
+        #gname = prepareList(gname)
+
+        # tratto la stringa da cercare
+        gname = prepareString(gname)
 
         id = ''
         name = ''
@@ -502,15 +350,8 @@ if __name__ == "__main__":
 
         where = [d['name'] for d in psl]
 
+        # cerco il file all'interno del lista
         mostaccurate = searchLocalFuzzy(where,gname,89)
-
-
-        
-        if mostaccurate == None:
-
-        #     embF = embTransf(model, device, [gname])
-        #     mostaccurate = bestTrasf(embF ,embDB, [d['name'] for d in sl], 60)
-            mostaccurate = fs.search(gname,1,60)
 
         if mostaccurate == None:
 
