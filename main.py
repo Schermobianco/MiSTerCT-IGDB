@@ -38,8 +38,6 @@ JSONfolder = 'JSON/'
 DBfolder = 'DB/'
 
 replacements_dict = {
-    #'dysney': '',
-    #"dysney's": '',
     ' a ':' ',
     ' the ':' ',
     'the ':' ',
