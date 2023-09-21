@@ -2,18 +2,20 @@
 import os
 import sys
 import shutil
-from igdb.wrapper import IGDBWrapper
-import json
+
+
 from datetime import datetime
 import joblib
-import csv
+
 from typing import List
-import threading
-import queue
+
 import time
 import re
 #from thefuzz import process
 from rapidfuzz import process, fuzz, utils
+
+from pack.fun import *
+from pack.api_igdb import *
 
 from sentence_transformers import SentenceTransformer, util
 import torch
@@ -33,8 +35,6 @@ import tensorflow_hub as hub
 threadList = []
 
 path_source = r'D:\Temp\JD'
-CSVfolder = 'CSV/'
-JSONfolder = 'JSON/'
 DBfolder = 'DB/'
 
 replacements_dict = {
@@ -174,37 +174,6 @@ class FuzzySemanticSearch:
 # def createFolder(foldername):
 #     if not os.path.exists(subfolder + '/' + foldername):
 #         os.makedirs(subfolder + '/' + foldername)
-
-def exportListCSV(sourceList,fileName):
-
-    # # try:
-    # myfile = open(CSVfolder + fileName, 'w', newline='', encoding="utf-8-sig")
-    # wr = csv.writer(myfile, quoting=csv.QUOTE_ALL,delimiter =';')
-    # wr.writerow(list(sourceList[0]))
-    # for element in sourceList:
-    #     # controllo se l'elemento è un dizionario
-    #     if type(element) is dict: wr.writerow(element.values())
-    #     else: wr.writerow(element)
-    #     #wr.writerow(element.values())
-    # myfile.close()
-    # # except:
-    # #     pass
-
-    # optional: compute the fieldnames:
-    fieldnames = set()
-    for d in sourceList:
-        fieldnames.update(d.keys())
-    fieldnames = sorted(fieldnames)    # sort the fieldnames...
-
-    # produce the csv file
-    with open(CSVfolder + fileName, "w", newline='', encoding="utf-8-sig") as fd:
-        wr = csv.DictWriter(fd, fieldnames, quoting=csv.QUOTE_ALL, delimiter =';')
-        wr.writeheader()
-        wr.writerows(sourceList)
-
-def exportListJSON(sourceList,fileName):
-    with open(JSONfolder + fileName, "w") as myfile:
-        json.dump(sourceList, myfile)
 
 def prepareList(sourceList,keyname = None):
     
@@ -384,136 +353,6 @@ def getFileRegion(fileName: str):
             return value
     
     return None
-
-def getMultiThread(name,endPoint,fields,where = ''):
-
-    global threadList
-
-    pre = name
-    ext = '.sav'
-    filename = pre + ext
-
-    try:
-        lout = joblib.load(filename)
-        #exportListCSV(lout,pre + '.csv')
-        return lout
-    except:
-        lout = []
-
-    threadList = lout.copy()
-
-    print(name + ' - import time> --- start')
-    start_time = time.time()
-
-    q = queue.Queue()
-
-    def count(endPoint,where):
-        byte_array = wrapper.api_request(endPoint + '/count',where + ';')
-        
-        # converto da bytes a stringa JSON
-        j = byte_array.decode()
-
-        # converto da stringa a lista
-        l = json.loads(j)
-
-        return l['count']
-
-
-    def mainQuery(endPoint,fields,where,offset):
-        global threadList
-
-        lout = []
-        
-        attempts = 0
-        maxAttempts = 5
-
-        if len(where) > 0: where = where + '; '
-
-        while attempts < maxAttempts:
-            try:
-                byte_array = wrapper.api_request(
-                        endPoint,
-                        #fields + ';' + where +'; offset ' + str(offset) + '; limit 500;'
-                        fields + '; ' + where +' offset ' + str(offset) + '; limit 500;'
-                    )
-                # converto da bytes a stringa JSON
-                j = byte_array.decode()
-
-                # converto da stringa a lista
-                lout = json.loads(j)
-
-                break
-
-            except Exception as exc:
-                attempts += 1
-                print('<Error! - attempt: ' + str(attempts) + '/' + str(maxAttempts) + ' > EndPoint: ' + endPoint  , '#',exc)
-                time.sleep(1/thread_count)
-
-        if attempts == maxAttempts: 
-            print('<FAILED! ' + str(attempts) + ' > EndPoint: ' + endPoint )
-            os._exit(1)
-            
-        perc = round((100 / counted) * offset,2)
-        print('                                                                                                       ', end="\r")
-        print( name + ' - processed: ' + str(perc) + '%', end="\r")
-
-        threadList.extend(lout)
-
-    threads = []
-
-    
-    thread_count = 4 # numero massimo di thread per interrgogare IGDB max 4 al secondo
-    min_time = 1 # ritardo in secondi tra le richieste ai thread (in secondi)
-
-    def worker():
-        while True:
-
-            endPoint,fields,where,offset = q.get()
-            if endPoint is None:
-                break
-
-            start_req = time.time()
-            mainQuery(endPoint,fields,where,offset)
-
-            # calcolo il ritardo tra le richieste
-            if (time.time() - start_req) < min_time: 
-                time.sleep(min_time - (time.time() - start_req))
-
-            q.task_done()
-
-    for x in range(0, thread_count):
-        t = threading.Thread(target=worker)
-        threads.append(t)
-        t.start()
-        # print('Started: %s' % t)
-
-    
-    counted = count(endPoint,where)
-    print(name + ' - records: ' + str(counted))
-    for i in range(0,int(counted/500) + 1):
-        offset = i * 500
-        q.put((endPoint,fields,where,offset))
-        
-    # block until all tasks are done
-    q.join()
-
-    # stop workers
-    for _ in threads:
-        q.put((None,None,None,None))
-
-    for t in threads:
-        t.join()
-
-    print(name + ' - import time> --- %s seconds' % (time.time() - start_time))
-
-    lout = threadList[:]
-
-    joblib.dump(lout, filename)
-
-    try: exportListCSV(lout,pre + '.csv')
-    except: pass
-
-    return lout
 
 def getSimpleList(platformID):
     pre = 'simple_' + str(platformID)
