@@ -278,7 +278,16 @@ if __name__ == "__main__":
     # 58 = S Famicom
     platform = '19,58'
 
+    # --------------------------------------------------
+    # DA ABILITARE PER SCARICARE LOCALMENTE LE VARIE TABELLE TRAMITE API, VERRANNO SALVATE COME .CSV E .SAV (LISTA IN FORMATO BINARIO)
+    # la funzione "getMultiThread" richiede:
+    #       name = nome della lista creata
+    #       endPoint = nome tabella IGDB (https://api-docs.igdb.com/#endpoints)
+    #       fields = colonne richieste
+    #       where = condizione di where per la query
+    # --------------------------------------------------
     
+
     # getMultiThread('game_localizations','game_localizations','fields *')
     # getMultiThread('regions','regions','fields *')
 
@@ -297,12 +306,16 @@ if __name__ == "__main__":
     
     # getMultiThread('alternative_names','alternative_names','fields *')
 
-
-    sl = getSimpleList(platform)
-
-
     # exit()
 
+    # --------------------------------------------------
+
+
+
+
+    # preparo una lista semplificata con le informazioni minime per provare l'abbinamento
+    # al suo interno utilizza gia la funzione "getMultiThread"
+    sl = getSimpleList(platform)
 
     # tratto la lista di testi dove cercare
     psl = prepareList(sl,'name')
@@ -326,15 +339,16 @@ if __name__ == "__main__":
     # ---
 
 
+    # scorro la lista contenente i nomi file per cercare un abbinamento utilizzando fuzzy
     for f in files:
         
-        # escludo tutto quello che trovo dopo "("
-
+        # FORZATURA escludo tutto quello che trovo dopo "("
         gname = f.split('(',1)
 
+        # estraggo la regione dal nome file
         fregion = getFileRegion(f)
+
         gname = gname[0]
-        #gname = prepareList(gname)
 
         # tratto la stringa da cercare
         gname = prepareString(gname)
@@ -362,7 +376,6 @@ if __name__ == "__main__":
             continue
         else:
             out = f,gname,'',mostaccurate[0],int(mostaccurate[1])
-            #out = f,gname,'',mostaccurate
             print(out)
             si = si + 1
 
@@ -413,7 +426,6 @@ if __name__ == "__main__":
     print('----------------')
     print('%:',(100/(si+no))*si)
     print('----------------')
-        #break
 
         
 
