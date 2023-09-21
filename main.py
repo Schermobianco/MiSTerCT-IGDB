@@ -315,6 +315,12 @@ if __name__ == "__main__":
 
     # preparo una lista semplificata con le informazioni minime per provare l'abbinamento
     # al suo interno utilizza gia la funzione "getMultiThread"
+    # le tabelle scaricate saranno:
+    #   genres
+    #   companies
+    #   involved_companies
+    #   games_# (dove # = id piattaforma)
+    #   alternative_names
     sl = getSimpleList(platform)
 
     # tratto la lista di testi dove cercare
