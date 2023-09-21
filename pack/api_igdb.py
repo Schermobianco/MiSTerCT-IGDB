@@ -8,6 +8,9 @@ import os
 
 from pack.fun import *
 
+# richiede clietID, token
+#   client_id = viene assegnato da twitch all'applicativo
+#   auth_token = viene generato dallo script "generate.py" tramite il codice "client_secret" che viene a sua volta generato da twitch
 wrapper = IGDBWrapper("ltoj7yg0pb1t32gxtvph876ojyp12d", "qb3lm8ls99u2kux3se4z4wk3501pc8")
 
 
