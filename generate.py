@@ -1,8 +1,8 @@
 import requests
+import os
 
-client_id = 'ltoj7yg0pb1t32gxtvph876ojyp12d'
-client_secret = 'pz2xzxuz8o73yyz0smm8xt8hbshpeu'
-streamer_name = 'schermobianco'
+client_id = os.environ['CLIENT_ID']
+client_secret = os.environ['CLIENT_SECRET']
 
 body = {
     'client_id': client_id,
@@ -12,7 +12,7 @@ body = {
 r = requests.post('https://id.twitch.tv/oauth2/token', body)
 
 #data output
-keys = r.json();
+keys = r.json()
 
 print(keys)
 
@@ -22,14 +22,3 @@ headers = {
 }
 
 print(headers)
-
-stream = requests.get('https://api.twitch.tv/helix/streams?user_login=' + streamer_name, headers=headers)
-
-stream_data = stream.json();
-
-print(stream_data);
-
-if len(stream_data['data']) == 1:
-    print(streamer_name + ' is live: ' + stream_data['data'][0]['title'] + ' playing ' + stream_data['data'][0]['game_name']);
-else:
-    print(streamer_name + ' is not live');
