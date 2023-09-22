@@ -8,6 +8,10 @@ jobs:
   secrets-in-github-actions:
     runs-on: windows-latest
 
-    env: 
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+    steps:
+          - name: Step 1
+
+            env: 
+              CLIENT_ID: ${{ secrets.CLIENT_ID }}
+              AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+     
