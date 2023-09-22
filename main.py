@@ -13,8 +13,9 @@ from typing import List
 
 import time
 import re
-#from thefuzz import process
+
 from rapidfuzz import process, fuzz, utils
+
 
 threadList = []
 
