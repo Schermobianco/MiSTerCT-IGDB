@@ -1,0 +1,13 @@
+name: Secret to env
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  secrets-in-github-actions:
+    runs-on: windows-latest
+
+    env: 
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
