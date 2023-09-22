@@ -165,6 +165,7 @@ cython_debug/
 *.sav
 *.emb
 *.mod
+/secret/**
 /venv/**
 /__pycache__/**
 /.vscode/**
@@ -176,3 +177,4 @@ desktop.ini
 /Pack/__pycache__/**
 changelog.txt
 create changelog.ps1
+config.py
