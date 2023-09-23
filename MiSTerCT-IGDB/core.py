@@ -5,10 +5,16 @@ from datetime import datetime
 from rapidfuzz import process
 
 from file_export import export_list_to_csv
-from api_igdb import getMultiThread
+from api_igdb import getMultiThread # legacy
 from igdb_api_class import IGDBAPI
 from config_dicts import replacements_dict, region_dict
+from db_class import DATABASE
 
+
+def fill_db():
+    pl = IGDBAPI("platforms","platforms","fields *").retrieve_data()
+    with DATABASE("IGDB.db") as db:
+        db.list_to_db(pl, "platforms",True)
 
 def prepareList(sourceList, keyname=None):
     for e in sourceList:

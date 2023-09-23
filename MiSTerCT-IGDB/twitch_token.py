@@ -15,7 +15,7 @@ def get_access_token():
         auth_response.raise_for_status()
         return auth_response.json()['access_token']
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'<Error! - TOKEN> {e}')
         return None
 
 

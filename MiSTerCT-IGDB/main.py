@@ -5,12 +5,13 @@ from core import (
     getFileRegion,
     prepareString,
     searchLocalFuzzy,
+    fill_db
 )
+
+import csv
 
 threadList = []
 path_source = r"D:\Temp\JD"
-DBfolder = "DB/"
-
 
 # def createFolder(foldername):
 #     if not os.path.exists(subfolder + '/' + foldername):
@@ -21,6 +22,10 @@ if __name__ == "__main__":
     # 19 = SNES
     # 58 = S Famicom
     platform = "19,58"
+
+    fill_db()
+
+    exit() # >> TO REMOVE
 
     # --------------------------------------------------
     # DA ABILITARE PER SCARICARE LOCALMENTE LE VARIE TABELLE TRAMITE API, VERRANNO SALVATE COME .CSV E .SAV (LISTA IN FORMATO BINARIO)
