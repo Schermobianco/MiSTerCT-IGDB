@@ -111,6 +111,9 @@ class IGDBAPI:
     def retrieve_data(self):
         self.load_data()
 
+        # if not empty i return it (is form .sav file)
+        if self.threadList != []: return self.threadList
+
         q = queue.Queue()
 
         threads = []
