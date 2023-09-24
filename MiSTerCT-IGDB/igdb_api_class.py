@@ -21,7 +21,7 @@ def createIGDBWrapper():
 
 
 class IGDBAPI:
-    def __init__(self, name, endPoint, fields, where=""):
+    def __init__(self, name, endPoint, fields, where="", saveBin :bool = False , saveCSV :bool = False):
         self.name = name
         self.endPoint = endPoint
         self.fields = fields
@@ -30,12 +30,18 @@ class IGDBAPI:
         self.threadList = []
         self.filename = f"{name}.sav"
         self.counted = 0
+        self.saveBin = saveBin
+        self.saveCSV = saveCSV
 
     def load_data(self):
-        try:
-            self.threadList = joblib.load(self.filename)
-            return self.threadList
-        except Exception:
+        if self.saveBin:
+            try:
+                self.threadList = joblib.load(self.filename)
+                return self.threadList
+            except Exception:
+                self.threadList = []
+                return self.threadList
+        else:
             self.threadList = []
             return self.threadList
 
@@ -123,6 +129,10 @@ class IGDBAPI:
             t.start()
 
         self.count_records()
+        print(
+            "                                                                                                       ",
+            end="\r",
+        )
         print(self.name + " - records: " + str(self.counted))
         for i in range(0, int(self.counted / 500) + 1):
             offset = i * 500
@@ -136,11 +146,12 @@ class IGDBAPI:
         for t in threads:
             t.join()
 
-        joblib.dump(self.threadList, self.filename)
+        if self.saveBin: joblib.dump(self.threadList, self.filename)
 
-        try:
-            export_list_to_csv(self.threadList, f"{self.name}.csv")
-        except Exception:
-            pass
+        if self.saveCSV:
+            try:
+                export_list_to_csv(self.threadList, f"{self.name}.csv")
+            except Exception:
+                pass
 
         return self.threadList
