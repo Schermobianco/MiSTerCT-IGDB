@@ -100,7 +100,7 @@ class DATABASE():
 
             
         try:
-            return pd.read_sql_query(query, self.db_conn)
+            return pd.read_sql_query(query + where, self.db_conn)
         except Exception as e:
             print(f"<Error! - SQL> SELECT: {e}")
             return

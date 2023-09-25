@@ -9,46 +9,24 @@ from api_igdb import getMultiThread # legacy
 from igdb_api_class import IGDBAPI
 from config_dicts import replacements_dict, region_dict
 from db_class import DATABASE
+import pandas as pd
+
+def prepare_names_df(df_column :pd.DataFrame):
+    for key, value in replacements_dict.items():
+        df_column = df_column.str.replace(key, value)
+
+    df_column.str.replace("[\(\[].*?[\)\]]", "", regex=True)
+    df_column.str.replace("\s{2,}", " ", regex=True)
+    df_column = df_column.str.strip()
+    df_column = df_column.str.lower()
+
+    # rimpiazza le lettere multiple consecutive
+    # e[keyname] = re.sub(r"(.)\1+", r"\1", e[keyname])
+
+    return df_column
 
 
-def prepareList(sourceList, keyname=None):
-    for e in sourceList:
-        if type(sourceList[0]) is dict:
-            for key, value in replacements_dict.items():
-                if e[keyname] is None:
-                    e[keyname] = ""
-                if key in e[keyname]:
-                    # se dizionario
-                    e[keyname] = e[keyname].replace(key, value)
-
-            re.sub("[\(\[].*?[\)\]]", "", e[keyname])
-            e[keyname] = re.sub("\s{2,}", " ", e[keyname])
-            e[keyname] = e[keyname].strip()
-            e[keyname] = e[keyname].lower()
-
-            # rimpiazza le lettere multiple consecutive
-            # e[keyname] = re.sub(r"(.)\1+", r"\1", e[keyname])
-
-        else:
-            for key, value in replacements_dict.items():
-                if e is None:
-                    e = ""
-                if key in e:
-                    # se dizionario
-                    e = e.replace(key, value)
-
-            re.sub("[\(\[].*?[\)\]]", "", e)
-            e = re.sub("\s{2,}", " ", e)
-            e = e.strip()
-            e = e.lower()
-
-            # rimpiazza le lettere multiple consecutive
-            # e = re.sub(r"(.)\1+", r"\1", e)
-
-    return sourceList
-
-
-def prepareString(source):
+def prepare_string(source):
     source = source.lower()
     for key, value in replacements_dict.items():
         if key in source:

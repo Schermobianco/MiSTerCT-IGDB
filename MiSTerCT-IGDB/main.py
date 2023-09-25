@@ -1,9 +1,9 @@
 from core import (
     getSimpleList,
-    prepareList,
     getFileFromTxt,
     getFileRegion,
-    prepareString,
+    prepare_names_df,
+    prepare_string,
     searchLocalFuzzy,
     get_names
 )
@@ -22,14 +22,13 @@ if __name__ == "__main__":
     platforms = "19,58"
 
     df_names = get_names(platforms)
+
+    # tratto la colonna nomi dove cercare
+    df_names['name'] = prepare_names_df(df_names['name'])
     print(df_names)
+    #exit()
 
-    exit()
-
-    sl = getSimpleList(platforms)
-
-    # tratto la lista di testi dove cercare
-    psl = prepareList(sl, "name")
+    #sl = getSimpleList(platforms)
 
     # carico file da directory
     # files = getFileList(path_source)
@@ -71,7 +70,7 @@ if __name__ == "__main__":
         gname = gname[0]
 
         # tratto la stringa da cercare
-        gname = prepareString(gname)
+        gname = prepare_string(gname)
 
         id = ""
         name = ""
@@ -82,10 +81,8 @@ if __name__ == "__main__":
 
         ginfo = []
 
-        where = [d["name"] for d in psl]
-
         # cerco il file all'interno del lista
-        mostaccurate = searchLocalFuzzy(where, gname, 89)
+        mostaccurate = searchLocalFuzzy(df_names['name'].to_list(), gname, 89)
 
         if mostaccurate == None:
             out = f, gname, "", "<NOT FOUND>"
