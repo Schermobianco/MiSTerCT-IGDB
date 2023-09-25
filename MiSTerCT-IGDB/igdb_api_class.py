@@ -76,7 +76,7 @@ class IGDBAPI:
             except Exception as exc:
                 attempts += 1
                 print(
-                    "<Error! - attempt: "
+                    "<ERROR! - IGDB attempt: "
                     + str(attempts)
                     + "/"
                     + str(maxAttempts)
@@ -88,15 +88,15 @@ class IGDBAPI:
                 time.sleep(1 / THREAD_COUNT)
 
         if attempts == maxAttempts:
-            print("<FAILED! " + str(attempts) + " > EndPoint: " + self.endPoint)
+            print("<FAILED! - IGDB " + str(attempts) + " > EndPoint: " + self.endPoint)
             os._exit(1)
 
         perc = round((100 / self.counted) * offset, 2)
         print(
-            "                                                                                                       ",
+            "                                                                                                                                                               ",
             end="\r",
         )
-        print(self.name + " - processed: " + str(perc) + "%", end="\r")
+        print('<WORKING - IGDB> ' + self.name + " - processed: " + str(perc) + "%", end="\r")
 
         self.threadList.extend(lout)
 
@@ -129,16 +129,19 @@ class IGDBAPI:
             t.start()
 
         self.count_records()
-        print(
-            "                                                                                                       ",
-            end="\r",
-        )
-        print(self.name + " - records: " + str(self.counted))
+        print('')
+        print('<STARTED - IGDB> ' + self.name + " - records: " + str(self.counted))
         for i in range(0, int(self.counted / 500) + 1):
             offset = i * 500
             q.put(offset)
 
         q.join()
+        print(
+            "                                                                                                                                                               ",
+            end="\r",
+        )
+        print('<DONE - IGDB> Finished')
+
 
         for _ in threads:
             q.put(None)
