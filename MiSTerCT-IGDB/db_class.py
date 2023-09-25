@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 import os.path
 
 # get current working directory
@@ -73,15 +74,33 @@ class DATABASE():
 
             query = f"INSERT INTO {tableName} (%s) VALUES (%s)" % (columns, placeholders)
 
-            # dict values to string to insert list datatype in db
-            keys_values = row_dict.items()
-            db_dict = {key: str(value) for key, value in keys_values}
+            # trasform list value in str 
+            for key, value in row_dict.items():
+                if type(value) is list: 
+                    row_dict[key] = str(value).replace(", ","][")
 
             try:
-                self.db_cur.execute(query, db_dict)
+                self.db_cur.execute(query, row_dict)
             except Exception as e:
                 print(f"<Error! - SQL> Insert: {e}")
                 return
 
         self.db_conn.commit()
         print(f"<DONE - SQL> Table '{tableName}' populated")
+
+    def get_v_complete_names(self, platforms :str= None):
+
+        query = f"SELECT * FROM v_complete_names "
+        if platforms is not None:
+            pla_list = platforms.split(",")
+            where = f"WHERE platforms LIKE '%[{pla_list[0]}]%'"
+
+            for i in range(1,len(pla_list)):
+                where = f"{where} OR platforms LIKE '%[{pla_list[i]}]%'"
+
+            
+        try:
+            return pd.read_sql_query(query, self.db_conn)
+        except Exception as e:
+            print(f"<Error! - SQL> SELECT: {e}")
+            return

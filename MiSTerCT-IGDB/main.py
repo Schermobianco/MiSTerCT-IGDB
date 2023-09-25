@@ -5,7 +5,7 @@ from core import (
     getFileRegion,
     prepareString,
     searchLocalFuzzy,
-    fill_db
+    get_names
 )
 
 import csv
@@ -18,54 +18,15 @@ path_source = r"D:\Temp\JD"
 #         os.makedirs(subfolder + '/' + foldername)
 
 if __name__ == "__main__":
-    # 4 = N65
-    # 19 = SNES
-    # 58 = S Famicom
-    platform = "19,58"
+    # for info about platforms ID check INFO\platformsID.txt file
+    platforms = "19,58"
 
-    fill_db()
+    df_names = get_names(platforms)
+    print(df_names)
 
-    exit() # >> TO REMOVE
+    exit()
 
-    # --------------------------------------------------
-    # DA ABILITARE PER SCARICARE LOCALMENTE LE VARIE TABELLE TRAMITE API, VERRANNO SALVATE COME .CSV E .SAV (LISTA IN FORMATO BINARIO)
-    # la funzione "getMultiThread" richiede:
-    #       name = nome della lista creata
-    #       endPoint = nome tabella IGDB (https://api-docs.igdb.com/#endpoints)
-    #       fields = colonne richieste
-    #       where = condizione di where per la query
-    # --------------------------------------------------
-
-    # getMultiThread('game_localizations','game_localizations','fields *')
-    # getMultiThread('regions','regions','fields *')
-
-    # getMultiThread('release_dates','release_dates','fields *')
-    # getMultiThread('release_dates_' + str(platform),'release_dates','fields *','where platform = (' + str(platform) + ')')
-
-    # getMultiThread('companies','companies','fields *')
-    # getMultiThread('involved_companies','involved_companies','fields *')
-    # getMultiThread('platforms','platforms','fields *')
-
-    # getMultiThread('genres','genres','fields *')
-    # getMultiThread('games','games','fields *')
-
-    # getMultiThread('games_' + str(platform),'games','fields *','where platforms = (' + str(platform) + ')')
-
-    # getMultiThread('alternative_names','alternative_names','fields *')
-
-    # exit()
-
-    # --------------------------------------------------
-
-    # preparo una lista semplificata con le informazioni minime per provare l'abbinamento
-    # al suo interno utilizza gia la funzione "getMultiThread"
-    # le tabelle scaricate saranno:
-    #   genres
-    #   companies
-    #   involved_companies
-    #   games_# (dove # = id piattaforma)
-    #   alternative_names
-    sl = getSimpleList(platform)
+    sl = getSimpleList(platforms)
 
     # tratto la lista di testi dove cercare
     psl = prepareList(sl, "name")

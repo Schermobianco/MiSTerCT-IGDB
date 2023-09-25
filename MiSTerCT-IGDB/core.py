@@ -11,11 +11,6 @@ from config_dicts import replacements_dict, region_dict
 from db_class import DATABASE
 
 
-def fill_db():
-    pl = IGDBAPI("platforms","platforms","fields *").retrieve_data()
-    with DATABASE("IGDB.db") as db:
-        db.list_to_db(pl, "platforms",True)
-
 def prepareList(sourceList, keyname=None):
     for e in sourceList:
         if type(sourceList[0]) is dict:
@@ -135,7 +130,7 @@ def getSimpleList(platformID):
 
     lout = []
 
-    genres = IGDBAPI("genres", "genres", "fields *").retrieve_data
+    genres = IGDBAPI("genres", "genres", "fields *").retrieve_data()
     companies = IGDBAPI("companies", "companies", "fields *").retrieve_data()
     involved_companies = IGDBAPI(
         "involved_companies", "involved_companies", "fields *"
@@ -215,3 +210,8 @@ def getSimpleList(platformID):
         pass
 
     return lout
+
+def get_names(platforms):
+    with DATABASE("IGDB.db") as db:
+        return db.get_v_complete_names(platforms)
+        
