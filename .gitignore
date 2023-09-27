@@ -165,14 +165,15 @@ cython_debug/
 *.sav
 *.emb
 *.mod
-/secret/**
+*.sql
+/@secret/**
 /venv/**
 /__pycache__/**
 /.vscode/**
 /build/**
 /dist/**
 /model/**
-/esempi/**
+/@esempi/**
 desktop.ini
 /Pack/__pycache__/**
 changelog.txt
