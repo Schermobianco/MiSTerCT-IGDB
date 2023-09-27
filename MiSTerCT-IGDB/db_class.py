@@ -8,6 +8,19 @@ path = os.getcwd()
 path = f"{path}\DB"
 BASE_DIR = path
 
+'''
+VIEW:
+v_complete_names    = official and alternative games names
+v_official_names    = official games names
+v_alternative_names = alternative games names
+
+v_simple_all        = complete games info
+v_simple_releases   = releases games info
+v_simple_genres     = genres games info
+v_simple_publishers = publishers games info
+v_simple_developers = developers games info
+'''
+
 class DATABASE():
     def __init__(self, db_name, db_path = BASE_DIR):
         self.db_name = db_name
@@ -88,9 +101,9 @@ class DATABASE():
         self.db_conn.commit()
         print(f"<DONE - SQL> Table '{tableName}' populated")
 
-    def get_v_complete_names(self, platforms :str= None):
+    def get_v_names(self, tableName, platforms :str= None):
 
-        query = f"SELECT * FROM v_complete_names "
+        query = f"SELECT * FROM {tableName} "
         if platforms is not None:
             pla_list = platforms.split(",")
             where = f"WHERE platforms LIKE '%[{pla_list[0]}]%'"

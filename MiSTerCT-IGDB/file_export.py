@@ -1,8 +1,8 @@
 import csv
 import json
 
-CSVfolder = "CSV/"
-JSONfolder = "JSON/"
+CSVfolder = "Export/"
+JSONfolder = "Export/"
 
 
 def export_list_to_csv(source_list, file_name):
@@ -24,6 +24,6 @@ def export_list_to_csv(source_list, file_name):
         print(f"Error: {e}")
 
 
-def exportListJSON(sourceList, fileName):
+def export_list_to_json(sourceList, fileName):
     with open(JSONfolder + fileName, "w") as myfile:
         json.dump(sourceList, myfile)

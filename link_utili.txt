@@ -1,3 +1,0 @@
-STRUTTURA DB IGDB:
-
-https://api-docs.igdb.com/#endpoints

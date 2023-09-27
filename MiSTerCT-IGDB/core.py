@@ -191,5 +191,5 @@ def getSimpleList(platformID):
 
 def get_names(platforms):
     with DATABASE("IGDB.db") as db:
-        return db.get_v_complete_names(platforms)
+        return db.get_v_names("v_complete_names",platforms)
         
