@@ -5,9 +5,8 @@ from datetime import datetime
 from rapidfuzz import process
 
 from file_export import export_list_to_csv
-from api_igdb import getMultiThread # legacy
 from igdb_api_class import IGDBAPI
-from config_dicts import replacements_dict, region_dict
+from config_dicts import replacements_dict, regionEnum_dict, region_dict
 from db_class import DATABASE
 import pandas as pd
 
@@ -38,7 +37,7 @@ def prepare_string(source):
     return source
 
 
-def searchLocalFuzzy(sourceList, search: str, cutoff) -> str:
+def fuzzy_search(sourceList, search: str, cutoff) -> str:
     if len(sourceList) == 0:
         return False
 
@@ -47,15 +46,15 @@ def searchLocalFuzzy(sourceList, search: str, cutoff) -> str:
     return out
 
 
-def getElementFromList(list, tosearch, value, toget):
+def get_listdict_element(list, tosearch, value, toget):
     return [d[toget] for d in list if d[tosearch] == value][0]
 
 
-def getDictFromList(list, tosearch, value):
+def get_listdict(list, tosearch, value):
     return [d for d in list if d[tosearch] == value]
 
 
-def getFileList(dir_path):
+def get_files_from_dir(dir_path):
     # directory/folder path
 
     # list to store files
@@ -70,7 +69,7 @@ def getFileList(dir_path):
     return res
 
 
-def getFileFromTxt(fileName):
+def get_files_from_txt(fileName):
     # Using readlines()
     myfile = open(fileName, "r")
     Lines = myfile.readlines()
@@ -85,7 +84,7 @@ def getFileFromTxt(fileName):
     return out
 
 
-def getFileRegion(fileName: str):
+def get_file_region(fileName: str):
     fileName = fileName.lower()
     for key, value in region_dict.items():
         if key in fileName:
@@ -93,103 +92,17 @@ def getFileRegion(fileName: str):
 
     return None
 
+def get_region_name(regionNum: str):
+    if regionNum is None: return '<NOT FOUND>'
 
-def getSimpleList(platformID):
-    prefix = "simple_" + str(platformID)
-    ext = ".sav"
-    filename = prefix + ext
+    return regionEnum_dict[regionNum]
 
-    try:
-        sl = joblib.load(filename)
-        export_list_to_csv(sl, prefix + ".csv")
-        return sl
-    except Exception:
-        sl = []
 
-    lout = []
-
-    genres = IGDBAPI("genres", "genres", "fields *").retrieve_data()
-    companies = IGDBAPI("companies", "companies", "fields *").retrieve_data()
-    involved_companies = IGDBAPI(
-        "involved_companies", "involved_companies", "fields *"
-    ).retrieve_data()
-    games = IGDBAPI(
-        "games_" + str(platformID),
-        "games",
-        "fields *",
-        "where platforms = (" + str(platformID) + ")",
-    ).retrieve_data()
-    alternative_names = IGDBAPI(
-        "alternative_names", "alternative_names", "fields *"
-    ).retrieve_data()
-
-    for element in games:
-        print(element["name"])
-        id = element["id"]
-        name = element["name"]
-        release = ""
-
-        gen = []
-        try:
-            for i in element["genres"]:
-                gname = getElementFromList(genres, "id", i, "name")
-                gen.append(gname)
-        except Exception:
-            pass
-
-        dev = []
-        pub = []
-        try:
-            release = datetime.utcfromtimestamp(element["first_release_date"]).strftime(
-                "%Y-%m-%d"
-            )
-            for i in element["involved_companies"]:
-                cid = getElementFromList(involved_companies, "id", i, "company")
-                cname = getElementFromList(companies, "id", cid, "name")
-                fdev = getElementFromList(involved_companies, "id", i, "developer")
-                fpub = getElementFromList(involved_companies, "id", i, "publisher")
-
-                if fdev:
-                    dev.append(cname)
-                if fpub:
-                    pub.append(cname)
-        except Exception:
-            pass
-
-        lout.append(
-            {"id": id, "name": name, "rel": release, "gen": gen, "pub": pub, "dev": dev}
-        )
-
-        altName = []
-        try:
-            for i in element["alternative_names"]:
-                gname = getElementFromList(alternative_names, "id", i, "name")
-                lout.append(
-                    {
-                        "id": id,
-                        "name": gname,
-                        "rel": release,
-                        "gen": gen,
-                        "pub": pub,
-                        "dev": dev,
-                    }
-                )
-        except Exception:
-            pass
-
-    # ordino la luista per id
-    lout = sorted(lout, key=lambda d: d["id"])
-
-    joblib.dump(lout, filename)
-
-    try:
-        export_list_to_csv(lout, prefix + ".csv")
-    except Exception:
-        pass
-
-    return lout
-
-def get_names(platforms):
+def get_db_names(tableName,platforms):
     with DATABASE("IGDB.db") as db:
-        return db.get_v_names("v_complete_names",platforms)
+        return db.get_v_names(tableName,platforms)
+    
+def get_db_data(tableName,platforms):
+    with DATABASE("IGDB.db") as db:
+        return db.get_v_data(tableName,platforms)
         

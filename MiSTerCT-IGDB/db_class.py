@@ -117,3 +117,15 @@ class DATABASE():
         except Exception as e:
             print(f"<Error! - SQL> SELECT: {e}")
             return
+        
+    def get_v_data(self, tableName, platforms :str= None):
+
+        query = f"SELECT * FROM {tableName} "
+
+        where = f"WHERE platform in ({platforms})"
+
+        try:
+            return pd.read_sql_query(query + where, self.db_conn)
+        except Exception as e:
+            print(f"<Error! - SQL> SELECT: {e}")
+            return

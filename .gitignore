@@ -179,4 +179,5 @@ desktop.ini
 changelog.txt
 create changelog.ps1
 config.py
+/Tools/SQLiteStudio/**
 IGDB.db
