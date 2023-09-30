@@ -69,6 +69,11 @@ It then can be run using:
 python3 MiSTerCT-IGDB/main.py
 ```
 
+To fill the DB use:
+```
+python3 MiSTerCT-IGDB/db_fill.py
+```
+
 More information and functionalities coming soon since at the moment it's just a proof of concept.
 
 
