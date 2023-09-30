@@ -167,17 +167,16 @@ cython_debug/
 *.mod
 *.sql
 /@secret/**
+/@esempi/**
+/@Tools/**
 /venv/**
 /__pycache__/**
 /.vscode/**
 /build/**
 /dist/**
 /model/**
-/@esempi/**
 desktop.ini
-/Pack/__pycache__/**
 changelog.txt
 create changelog.ps1
 config.py
-/Tools/**
 IGDB.db
