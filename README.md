@@ -1,3 +1,9 @@
+![GitHub](https://img.shields.io/github/license/Schermobianco/MiSTerCT-IGDB?style=flat-square)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-3776AB?logo=Python&logoColor=FFFFFF&style=flat-square)](https://www.python.org/)
+![GitHub last commit](https://img.shields.io/github/last-commit/Schermobianco/MiSTerCT-IGDB?style=flat-square)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Schermobianco/MiSTerCT-IGDB?style=flat-square)
+![GitHub all releases](https://img.shields.io/github/downloads/Schermobianco/MiSTerCT-IGDB/total?style=flat-square)
+
 # MiSTerCT-IGDB
 
 Classification tool for MiSTer cores based on IGDB data.
