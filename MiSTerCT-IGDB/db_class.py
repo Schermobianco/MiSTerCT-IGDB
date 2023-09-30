@@ -27,8 +27,10 @@ class DATABASE():
         self.db_path = os.path.join(db_path, db_name)
         self.db_conn, self.db_cur = self.__connect()
 
+
     def __enter__(self):
         return self
+
 
     def __exit__(self, ext_type, exc_value, traceback):
         self.db_cur.close()
@@ -37,6 +39,7 @@ class DATABASE():
         else:
             self.db_conn.commit()
         self.db_conn.close()
+
 
     def __connect(self):
         try:
@@ -48,8 +51,22 @@ class DATABASE():
         db_cur = db_conn.cursor()
         return db_conn, db_cur
     
+
     def close(self):
         self.db_conn.close()
+
+
+    def compress(self):
+        query = f"VACUUM"
+
+        try:
+            self.db_cur.execute(query)
+        except Exception as e:
+            print(f"<Error! - SQL> Compress: {e}")
+            return
+
+        self.db_conn.commit()
+
 
     def table_exist(self, tableName):
         query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}'"
@@ -59,6 +76,7 @@ class DATABASE():
             return False
         else:
             return True
+
 
     def empty_table(self, tableName):
         query = f"DELETE FROM {tableName}"
@@ -70,6 +88,29 @@ class DATABASE():
             return
 
         self.db_conn.commit()
+
+    
+    def create_agr_table(self, platforms :str= None):
+        query = ""
+        query = f"{query} DROP TABLE IF EXISTS [t_agr_all];"
+        try:
+            self.db_cur.execute(query)
+        except Exception as e:
+            print(f"<Error! - SQL> Drop Table: {e}")
+            return
+
+        query = ""
+        query = f"{query} CREATE TABLE [t_agr_all] AS"
+        query = f"{query} select * FROM v_agr_all"
+        if platforms is not None: where = f" where platform in ({platforms})"
+        try:
+            self.db_cur.execute(query + where)
+        except Exception as e:
+            print(f"<Error! - SQL> Create Table: {e}")
+            return
+
+        self.db_conn.commit()
+
 
 
     def list_to_db(self, inputList, tableName, emptyBefore :bool = False):
@@ -101,6 +142,7 @@ class DATABASE():
         self.db_conn.commit()
         print(f"<DONE - SQL> Table '{tableName}' populated")
 
+
     def get_v_names(self, tableName, platforms :str= None):
 
         query = f"SELECT * FROM {tableName} "
@@ -117,6 +159,7 @@ class DATABASE():
         except Exception as e:
             print(f"<Error! - SQL> SELECT: {e}")
             return
+        
         
     def get_v_data(self, tableName, platforms :str= None):
 
