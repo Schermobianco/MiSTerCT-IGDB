@@ -9,14 +9,10 @@ from core import (
     get_db_data
 )
 
-import csv
+import csv # -- TO REMOVE
 
 threadList = []
 path_source = r"Sample Sources\\"
-
-# def createFolder(foldername):
-#     if not os.path.exists(subfolder + '/' + foldername):
-#         os.makedirs(subfolder + '/' + foldername)
 
 if __name__ == "__main__":
     # for info about platforms ID check INFO\platformsID.txt file
@@ -36,10 +32,10 @@ if __name__ == "__main__":
     df_names_off['name'] = prepare_names_df(df_names_off['name'])
     df_names_alt['name'] = prepare_names_df(df_names_alt['name'])
 
-    # carico file da directory
+    # fronm directory
     # files = get_files_from_dir(path_source)
 
-    # carico file da txt
+    # from txt file
     files = get_files_from_txt(f"{path_source}SNES.txt")
 
     prev = ""
@@ -48,7 +44,7 @@ if __name__ == "__main__":
 
     myfile = open("output.csv", "w", newline="", encoding="utf-8-sig")
 
-    # --- HEADER PER ESPORTAZIONE CSV
+    # --- HEADER CSV -- TO REMOVE
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL, delimiter=";")
     header = (
         "NOME FILE",
@@ -129,7 +125,7 @@ if __name__ == "__main__":
             found += 1
 
 
-            # --- PER ESPORTAZIONE CSV
+            # --- EXPORT CSV -- TO REMOVE
             wr.writerow(out)
             # ---
 
