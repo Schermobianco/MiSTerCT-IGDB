@@ -37,6 +37,11 @@ The empty DB file ``IGDB_empty.db`` is prefilled with some views:
 * v_simple_publishers
 * v_simple_releases
 
+To fill the DB use:
+```
+python3 MiSTerCT-IGDB/db_fill.py
+```
+
 
 ## Usage
 
@@ -67,11 +72,6 @@ or like this if you're using VScode on windows:
 It then can be run using:
 ```
 python3 MiSTerCT-IGDB/main.py
-```
-
-To fill the DB use:
-```
-python3 MiSTerCT-IGDB/db_fill.py
 ```
 
 More information and functionalities coming soon since at the moment it's just a proof of concept.
