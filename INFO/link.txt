@@ -1,3 +1,5 @@
 IGDB structure:
-
 https://api-docs.igdb.com/#endpoints
+
+DB Browser for SQLite (Windows, macOS, Linux, FreeBSD):
+https://sqlitebrowser.org/dl/
