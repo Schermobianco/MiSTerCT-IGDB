@@ -12,7 +12,7 @@ from core import (
 import csv
 
 threadList = []
-path_source = r"D:\Temp\JD"
+path_source = r"Sample Sources\\"
 
 # def createFolder(foldername):
 #     if not os.path.exists(subfolder + '/' + foldername):
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # for info about platforms ID check INFO\platformsID.txt file
     platforms = "19,58"
 
-    df_data = get_db_data('v_simple_all',platforms)
+    df_data = get_db_data('v_agr_all',platforms)
     df_data = df_data.set_index('id')
 
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # files = get_files_from_dir(path_source)
 
     # carico file da txt
-    files = get_files_from_txt("SNES.txt")
+    files = get_files_from_txt(f"{path_source}SNES.txt")
 
     prev = ""
     not_found = 0
