@@ -67,8 +67,10 @@ def fill_db(platform_filter = "All"):
         ).retrieve_data()
 
     with DATABASE("IGDB.db") as db:
-        # populte the tables into DB
+        # tune db
+        db.tune()
 
+        # populte the tables into DB
         empty_table = True
         db.list_to_db(platforms, "platforms",empty_table)
         db.list_to_db(genres, "genres",empty_table)
@@ -88,9 +90,6 @@ def fill_db(platform_filter = "All"):
 
         # create agr table
         db.create_agr_table(platform_filter)
-
-        # tune db
-        db.tune()
 
         # optimize db
         db.optimize()
