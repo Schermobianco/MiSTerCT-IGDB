@@ -5,7 +5,7 @@ import os.path
 # get current working directory
 path = os.getcwd()
 
-path = f"{path}\DB"
+path = f"{path}{os.sep}DB"
 BASE_DIR = path
 
 '''
