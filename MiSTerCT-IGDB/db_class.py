@@ -27,6 +27,7 @@ t_agr_all                   = v_agr_all table
 
 class DATABASE():
     def __init__(self, db_name, db_path = BASE_DIR):
+        print(f"<Info - SQL> SQLite v.{sqlite3.sqlite_version}")
         self.db_name = db_name
         self.db_path = os.path.join(db_path, db_name)
         self.db_conn, self.db_cur = self.__connect()
