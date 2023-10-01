@@ -11,7 +11,6 @@ from core import (
 
 import csv # -- TO REMOVE
 
-threadList = []
 path_source = r"Sample Sources\\"
 
 if __name__ == "__main__":
