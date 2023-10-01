@@ -1,5 +1,5 @@
 dbdir=./DB
-schema_filename=schema.sql
+schema_filename=schema/schema.sql
 db_empty=$(dbdir)/IGDB_empty.db
 db_name=newdb.db
 
