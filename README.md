@@ -53,11 +53,13 @@ Then you have to export the following environment variables:
 export TWITCH_CLIENT_ID=<your client id>
 export TWITCH_CLIENT_SECRET=<your secret id>
 ```
+
 or like this if you're on windows:
 ```
 set TWITCH_CLIENT_ID=<your client id>
 set TWITCH_CLIENT_SECRET=<your secret id>
 ```
+
 or like this if you're using VScode on windows:
 > .vscode\settings.json
 ```
@@ -68,6 +70,13 @@ or like this if you're using VScode on windows:
     }
 }
 ```
+
+or create a .env file in the main folder of the project:
+```
+TWITCH_CLIENT_ID=<your client id>
+TWITCH_CLIENT_SECRET=<your secret id>
+```
+
 
 It then can be run using:
 ```
