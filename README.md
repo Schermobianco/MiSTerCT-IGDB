@@ -12,7 +12,7 @@ The tool is still in development and not ready for use however it will allow you
 
 ## Local DB
 
-Based on SQLite3 v3.41.2.
+Based on SQLite3 v3.43.0.
 
 The empty DB file ``IGDB_empty.db`` is prefilled with some views:
 
