@@ -66,21 +66,23 @@ def fill_db(platform_filter = "All"):
 
     with DATABASE("IGDB.db") as db:
         # populte the tables into DB
-        db.list_to_db(platforms, "platforms",True)
-        db.list_to_db(genres, "genres",True)
-        db.list_to_db(companies, "companies",True)
-        db.list_to_db(involved_companies, "involved_companies",True)
-        db.list_to_db(regions, "regions",True)
-        db.list_to_db(release_dates, "release_dates",True)
-        db.list_to_db(games, "games",True)
-        db.list_to_db(alternative_names, "alternative_names",True)
-        db.list_to_db(franchises, "franchises",True)
-        db.list_to_db(game_engines, "game_engines",True)
-        db.list_to_db(game_modes, "game_modes",True)
-        db.list_to_db(player_perspectives, "player_perspectives",True)
-        db.list_to_db(collections, "collections",True)
-        db.list_to_db(age_ratings, "age_ratings",True)
-        db.list_to_db(game_localizations, "game_localizations",True)
+
+        empty_table = True
+        db.list_to_db(platforms, "platforms",empty_table)
+        db.list_to_db(genres, "genres",empty_table)
+        db.list_to_db(companies, "companies",empty_table)
+        db.list_to_db(involved_companies, "involved_companies",empty_table)
+        db.list_to_db(regions, "regions",empty_table)
+        db.list_to_db(release_dates, "release_dates",empty_table)
+        db.list_to_db(games, "games",empty_table)
+        db.list_to_db(alternative_names, "alternative_names",empty_table)
+        db.list_to_db(franchises, "franchises",empty_table)
+        db.list_to_db(game_engines, "game_engines",empty_table)
+        db.list_to_db(game_modes, "game_modes",empty_table)
+        db.list_to_db(player_perspectives, "player_perspectives",empty_table)
+        db.list_to_db(collections, "collections",empty_table)
+        db.list_to_db(age_ratings, "age_ratings",empty_table)
+        db.list_to_db(game_localizations, "game_localizations",empty_table)
 
         # create agr table
         db.create_agr_table(platform_filter)
