@@ -10,15 +10,19 @@ BASE_DIR = path
 
 '''
 VIEW:
-v_complete_names    = official and alternative games names
-v_official_names    = official games names
-v_alternative_names = alternative games names
+v_complete_names            = official and alternative games names
+v_official_names            = official games names
+v_alternative_names         = alternative games names
 
-v_simple_all        = complete games info
-v_simple_releases   = releases games info
-v_simple_genres     = genres games info
-v_simple_publishers = publishers games info
-v_simple_developers = developers games info
+v_agr_all                   = aggregate complete
+v_agr_releases              = aggregate releases
+v_agr_genres                = aggregate genres
+v_agr_publishers            = aggregate publishers
+v_agr_developers            = aggregate developers
+v_agr_game_engines          = aggregate engine
+v_agr_player_perspectives   = aggregate perspectives
+
+t_agr_all                   = v_agr_all table
 '''
 
 class DATABASE():
@@ -56,13 +60,28 @@ class DATABASE():
         self.db_conn.close()
 
 
-    def compress(self):
-        query = f"VACUUM"
+    def tune(self):
 
         try:
-            self.db_cur.execute(query)
+            self.db_cur.execute(f"PRAGMA synchronous = NORMAL") # Synchronous Commit
+            self.db_cur.execute(f"PRAGMA cache_size = -4000")# Max memory cache size 
+            self.db_cur.execute(f"PRAGMA temp_store = MEMORY") # Temporary files location
+            self.db_cur.execute(f"PRAGMA mmap_size = 30000000000") # Enable memory mapping
+            self.db_cur.execute(f"PRAGMA journal_mode = WAL") # Journal Mode
         except Exception as e:
-            print(f"<Error! - SQL> Compress: {e}")
+            print(f"<Error! - SQL> Tune: {e}")
+            return
+
+        self.db_conn.commit()
+
+
+    def optimize(self):
+        
+        try:
+            self.db_cur.execute(f"PRAGMA vacuum")
+            self.db_cur.execute(f"PRAGMA optimize")
+        except Exception as e:
+            print(f"<Error! - SQL> Optimize: {e}")
             return
 
         self.db_conn.commit()

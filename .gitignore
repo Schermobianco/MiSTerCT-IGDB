@@ -179,4 +179,4 @@ desktop.ini
 changelog.txt
 create changelog.ps1
 config.py
-IGDB.db
+IGDB.db*

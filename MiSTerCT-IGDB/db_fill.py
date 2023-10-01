@@ -85,8 +85,11 @@ def fill_db(platform_filter = "All"):
         # create agr table
         db.create_agr_table(platform_filter)
 
-        # compress db
-        db.compress()
+        # tune db
+        db.tune()
+
+        # optimize db
+        db.optimize()
 
 if __name__ == "__main__":
     platforms = "4,7,18,19,22,29,30,32,33,35,57,58,59,60,61,62,64,66,67,68,70,78,79,80,84,86,88,99,119,120,136,150,160"
