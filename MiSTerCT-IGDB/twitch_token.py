@@ -1,10 +1,15 @@
 import os
 import requests
+from dotenv import load_dotenv
+
+
+# load the needed env vars.
+# order is: os env first, .env file second. (see https://pypi.org/project/python-dotenv/)
+load_dotenv(override=False)
 
 TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
 TWITCH_AUTH_ENDPOINT = 'https://id.twitch.tv/oauth2/token'
-
 
 def get_access_token():
     try:
