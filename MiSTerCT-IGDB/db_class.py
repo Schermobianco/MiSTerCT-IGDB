@@ -49,13 +49,16 @@ class DATABASE():
     def __connect(self):
         try:
             db_conn = sqlite3.connect(self.db_path)
+            # this forces the client to load additional extensions avaible,
+            # useful for multi os support
+            db_conn.enable_load_extension(True)
         except Exception as e:
             print(f"<Error! - SQL> Connection: {e}")
             return
 
         db_cur = db_conn.cursor()
         return db_conn, db_cur
-    
+
 
     def close(self):
         self.db_conn.close()
@@ -65,7 +68,7 @@ class DATABASE():
 
         try:
             self.db_cur.execute(f"PRAGMA synchronous = NORMAL") # Synchronous Commit
-            self.db_cur.execute(f"PRAGMA cache_size = -4000")# Max memory cache size 
+            self.db_cur.execute(f"PRAGMA cache_size = -4000")# Max memory cache size
             self.db_cur.execute(f"PRAGMA temp_store = MEMORY") # Temporary files location
             self.db_cur.execute(f"PRAGMA mmap_size = 30000000000") # Enable memory mapping
             self.db_cur.execute(f"PRAGMA journal_mode = WAL") # Journal Mode
@@ -77,7 +80,7 @@ class DATABASE():
 
 
     def optimize(self):
-        
+
         try:
             self.db_cur.execute(f"PRAGMA vacuum")
             self.db_cur.execute(f"PRAGMA optimize")
@@ -109,7 +112,7 @@ class DATABASE():
 
         self.db_conn.commit()
 
-    
+
     def create_agr_table(self, platforms :str= None):
         query = ""
         query = f"{query} DROP TABLE IF EXISTS [t_agr_all];"
@@ -148,10 +151,10 @@ class DATABASE():
 
             query = f"INSERT INTO {tableName} (%s) VALUES (%s)" % (columns, placeholders)
 
-            # trasform list value in str 
+            # transform list value in str
             for key, value in row_dict.items():
-                if type(value) is list: 
-                    row_dict[key] = str(value).replace(", ","][")
+                if type(value) is list:
+                    row_dict[key] = str(value).strip()
 
             try:
                 self.db_cur.execute(query, row_dict)
@@ -173,14 +176,14 @@ class DATABASE():
             for i in range(1,len(pla_list)):
                 where = f"{where} OR platforms LIKE '%[{pla_list[i]}]%'"
 
-            
+
         try:
             return pd.read_sql_query(query + where, self.db_conn)
         except Exception as e:
             print(f"<Error! - SQL> SELECT: {e}")
             return
-        
-        
+
+
     def get_v_data(self, tableName, platforms :str= None):
 
         query = f"SELECT * FROM {tableName} "
