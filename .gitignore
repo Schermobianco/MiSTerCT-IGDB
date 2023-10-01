@@ -180,3 +180,6 @@ changelog.txt
 create changelog.ps1
 config.py
 IGDB.db*
+
+# macOs files
+.DS_Store
