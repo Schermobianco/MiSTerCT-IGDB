@@ -524,30 +524,16 @@ FROM   (WITH RECURSIVE
         FROM   [split]
                JOIN [player_perspectives] ON [player_perspectives].[id] = [split].[player_perspectives]) t
 GROUP  BY [id];
-CREATE VIEW [v_simple_player_perspectives]
-AS
-WITH RECURSIVE
-  [split]([id], [player_perspectives], [str]) AS(
-	SELECT
-		   [id],
-		   '',
-		   REPLACE (REPLACE (REPLACE ([player_perspectives], '][', ','), ']', ''), '[', '') || ','
-	FROM   [games]
-	UNION ALL
-	SELECT
-		   [id],
-		   SUBSTR ([str], 0, INSTR ([str], ',')),
-		   SUBSTR ([str], INSTR ([str], ',') + 1)
-	FROM   [split]
-	WHERE  [str] != ''
-  )
+CREATE VIEW [v_simple_player_perspectives] AS
 SELECT
-	   [split].[id],
-	   [split].[player_perspectives],
-	   [player_perspectives].[name] AS 'player_perspectives_name'
-FROM   [split]
-	   JOIN [player_perspectives] ON [player_perspectives].[id] = [split].[player_perspectives]
-ORDER BY split.id;
+	games_table.id AS 'id',
+	json_each.value AS 'player_perspectives',
+	player_perspectives_table.name AS 'player_perspectives_name'
+FROM
+	games AS 'games_table',
+    json_each(games_table.player_perspectives)
+	LEFT JOIN player_perspectives AS 'player_perspectives_table' ON player_perspectives_table.id = json_each.value
+ORDER BY games_table.id;
 CREATE VIEW [v_agr_game_modes]
 AS
 SELECT
