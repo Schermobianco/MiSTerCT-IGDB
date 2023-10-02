@@ -552,30 +552,16 @@ FROM   (WITH RECURSIVE
         FROM   [split]
                JOIN [game_modes] ON [game_modes].[id] = [split].[game_modes]) t
 GROUP  BY [id];
-CREATE VIEW [v_simple_game_modes]
-AS
-WITH RECURSIVE
-  [split]([id], [game_modes], [str]) AS(
-       SELECT
-                 [id],
-                 '',
-                 REPLACE (REPLACE (REPLACE ([game_modes], '][', ','), ']', ''), '[', '') || ','
-       FROM   [games]
-       UNION ALL
-       SELECT
-                 [id],
-                 SUBSTR ([str], 0, INSTR ([str], ',')),
-                 SUBSTR ([str], INSTR ([str], ',') + 1)
-       FROM   [split]
-       WHERE  [str] != ''
-  )
+CREATE VIEW [v_simple_game_modes] AS
 SELECT
-          [split].[id],
-          [split].[game_modes],
-          [game_modes].[name] AS [game_modes_name]
-FROM   [split]
-          JOIN [game_modes] ON [game_modes].[id] = [split].[game_modes]
-ORDER BY split.id;
+       games_table.id AS 'id',
+       json_each.value AS 'game_modes',
+       game_modes_table.name AS 'game_modes_name'
+FROM
+       games AS 'games_table',
+       json_each(games_table.game_modes)
+JOIN game_modes AS 'game_modes_table' ON game_modes_table.id = json_each.value
+ORDER BY games_table.id;
 CREATE VIEW v_agr_game_engines AS SELECT id,
            '[' || group_concat(game_engines, '][') || ']' AS game_engines,
            group_concat(game_engines_name, ', ') AS game_engines_name
