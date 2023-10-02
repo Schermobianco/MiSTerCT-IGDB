@@ -410,36 +410,22 @@ FROM
         WHERE  [involved_companies].[developer] = 1
 ) t
 GROUP  BY [id];
-CREATE VIEW [v_simple_publishers]
-AS
-WITH RECURSIVE
-  [split]([id], [involved_companies], [str]) AS(
-	SELECT
-		   [id],
-		   '',
-		   REPLACE (REPLACE (REPLACE ([involved_companies], '][', ','), ']', ''), '[', '') || ','
-	FROM   [games]
-	UNION ALL
-	SELECT
-		   [id],
-		   SUBSTR ([str], 0, INSTR ([str], ',')),
-		   SUBSTR ([str], INSTR ([str], ',') + 1)
-	FROM   [split]
-	WHERE  [str] != ''
-  )
+CREATE VIEW [v_simple_publishers] AS
 SELECT
-	   [split].[id],
-	   [split].[involved_companies],
-	   [involved_companies].[company] AS 'companies',
-	   [companies].[name] AS 'companies_name',
-	   IFNULL(' (' || [country_ISO3166-1].[alpha2] || ')','') AS 'CC'
-FROM   [split]
-	   LEFT JOIN [involved_companies] ON [involved_companies].[id] = [split].[involved_companies]
-	   LEFT JOIN [companies] ON [companies].[id] = [involved_companies].[company]
-	   LEFT JOIN [country_ISO3166-1] ON [country_ISO3166-1].[code] = [companies].[country]
-WHERE  [involved_companies].[publisher] = 1
-
-ORDER by split.id;
+	games_table.id AS 'id',
+	json_each.value AS 'involved_companies',
+	json_each.value AS 'companies',
+	companies_table.name AS 'companies_name',
+	IFNULL(country_table.alpha2, '') AS 'CC'
+FROM
+	games AS 'games_table',
+  json_each(games_table.involved_companies)
+LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = json_each.value
+LEFT JOIN companies  AS 'companies_table' ON companies_table.id = involved_companies_table.company
+LEFT JOIN [country_ISO3166-1] as 'country_table' ON country_table.code = companies_table.country
+WHERE  involved_companies_table.publisher = 1
+ORDER
+	BY games_table.id;
 CREATE VIEW [v_simple_developers]
 AS
 
