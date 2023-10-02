@@ -414,12 +414,12 @@ CREATE VIEW [v_simple_publishers] AS
 SELECT
        games_table.id AS 'id',
        json_each.value AS 'involved_companies',
-       json_each.value AS 'companies',
+       companies_table.id AS 'companies',
        companies_table.name AS 'companies_name',
        IFNULL(country_table.alpha2, '') AS 'CC'
 FROM
        games AS 'games_table',
-  json_each(games_table.involved_companies)
+       json_each(games_table.involved_companies)
 LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = json_each.value
 LEFT JOIN companies  AS 'companies_table' ON companies_table.id = involved_companies_table.company
 LEFT JOIN [country_ISO3166-1] as 'country_table' ON country_table.code = companies_table.country
