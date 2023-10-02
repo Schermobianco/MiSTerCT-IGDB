@@ -711,30 +711,20 @@ FROM   [games]
        LEFT JOIN [v_agr_publishers] ON [v_agr_publishers].[id] = [games].[id]
        LEFT JOIN [v_agr_developers] ON [v_agr_developers].[id] = [games].[id]
        LEFT JOIN [v_agr_game_engines] ON [v_agr_game_engines].[id] = [games].[id];
-CREATE VIEW v_simple_releases AS WITH tempgame as (
-    WITH g AS (
-        SELECT 
-            games.id as game_id, 
-            json_each.value as game_release_id 
-        FROM games, json_each(release_dates)
-    ) 
-    SELECT 
-        g.game_id as id, 
-        r.id as release_dates, 
-        r.human as date,
-        r.region,
-        r.platform
-    FROM g
-    JOIN release_dates AS r ON r.id = g.game_release_id
-)
-SELECT 
-    tempgame.id, 
-    tempgame.release_dates, 
-    tempgame.date, 
-    regionTable.value as region, 
-    regionTable.name as region_name, 
-    tempgame.platform 
-FROM tempgame 
-LEFT JOIN [release_dates#region] AS regionTable ON tempgame.region = regionTable.value
-ORDER BY tempgame.id;
+CREATE VIEW v_simple_releases AS
+SELECT
+    games_table.id AS 'id',
+    json_each.value AS 'release_dates',
+    reldates_table.human AS 'date',
+    reldates_table.region AS 'region',
+    region_table.name AS 'name',
+    reldates_table.platform AS 'platform'
+FROM
+    games AS 'games_table',
+    json_each(games_table.release_dates)
+    JOIN release_dates AS 'reldates_table' ON reldates_table.id = json_each.value
+    LEFT JOIN [release_dates#region] AS 'region_table' ON reldates_table.region = region_table.value
+    LEFT JOIN platforms AS 'platforms_table' ON reldates_table.platform = platforms_table.id
+ORDER BY
+    id;
 /* No STAT tables available */
