@@ -476,34 +476,16 @@ LEFT JOIN genres AS 'genres_table' ON genres_table.id = json_each.value
 ORDER BY games_table.id;
 
 DROP VIEW IF EXISTS [v_agr_player_perspectives];
-CREATE VIEW [v_agr_player_perspectives]
-AS
+CREATE VIEW [v_agr_player_perspectives] AS
 SELECT
-       [id],
-       '[' || GROUP_CONCAT ([player_perspectives], '][') || ']' AS 'player_perspectives',
-       GROUP_CONCAT ([player_perspectives_name], ', ') AS 'player_perspectives_name'
-FROM   (WITH RECURSIVE
-          [split]([id], [player_perspectives], [str]) AS(
-            SELECT
-                   [id],
-                   '',
-                   REPLACE (REPLACE (REPLACE ([player_perspectives], '][', ','), ']', ''), '[', '') || ','
-            FROM   [games]
-            UNION ALL
-            SELECT
-                   [id],
-                   SUBSTR ([str], 0, INSTR ([str], ',')),
-                   SUBSTR ([str], INSTR ([str], ',') + 1)
-            FROM   [split]
-            WHERE  [str] != ''
-          )
-        SELECT
-               [split].[id],
-               [split].[player_perspectives],
-               [player_perspectives].[name] AS 'player_perspectives_name'
-        FROM   [split]
-               JOIN [player_perspectives] ON [player_perspectives].[id] = [split].[player_perspectives]) t
-GROUP  BY [id];
+	g.id AS 'id',
+	g.player_perspectives  AS 'player_perspectives',
+	GROUP_CONCAT(p.name, ', ') AS 'player_perspectives_name'
+FROM
+	games AS g,
+	json_each(g.player_perspectives) AS jj
+LEFT JOIN player_perspectives AS p ON p.id = jj.value
+GROUP BY g.id;
 
 DROP VIEW IF EXISTS [v_simple_player_perspectives];
 CREATE VIEW [v_simple_player_perspectives] AS
