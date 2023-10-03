@@ -368,42 +368,19 @@ WHERE involved_companies.publisher = 1
 GROUP BY games.id;
 
 DROP VIEW IF EXISTS [v_agr_developers];
-CREATE VIEW [v_agr_developers]
-AS
+CREATE VIEW [v_agr_developers] AS
 SELECT
-       [id],
-       '[' || GROUP_CONCAT ([companies], '][') || ']' AS 'developers',
-       GROUP_CONCAT ([companies_name] || CC, ', ') AS 'developers_name'
+	g.id AS 'id',
+	JSON( '[' || GROUP_CONCAT(ic.company) || ']') AS 'developers',
+	GROUP_CONCAT(c.name || COALESCE(' (' || iso.alpha2 || ')', ''), ', ') AS 'developers_name'
 FROM
-(
-       WITH RECURSIVE
-         [split]([id], [involved_companies], [str]) AS(
-              SELECT
-                        [id],
-                        '',
-                        REPLACE (REPLACE (REPLACE ([involved_companies], '][', ','), ']', ''), '[', '') || ','
-              FROM   [games]
-              UNION ALL
-              SELECT
-                        [id],
-                        SUBSTR ([str], 0, INSTR ([str], ',')),
-                        SUBSTR ([str], INSTR ([str], ',') + 1)
-              FROM   [split]
-              WHERE  [str] != ''
-     )
-        SELECT
-               [split].[id],
-               [split].[involved_companies],
-               [involved_companies].[company] AS 'companies',
-               [companies].[name] AS 'companies_name',
-                        IFNULL(' (' || [country_ISO3166-1].[alpha2] || ')','') AS 'CC'
-        FROM   [split]
-               LEFT JOIN [involved_companies] ON [involved_companies].[id] = [split].[involved_companies]
-               LEFT JOIN [companies] ON [companies].[id] = [involved_companies].[company]
-               LEFT JOIN [country_ISO3166-1] ON [country_ISO3166-1].[code] = [companies].[country]
-        WHERE  [involved_companies].[developer] = 1
-) t
-GROUP  BY [id];
+	games AS 'g',
+	json_each(g.involved_companies) AS 'games_ic'
+LEFT JOIN involved_companies AS 'ic' ON ic.id = games_ic.value
+LEFT JOIN companies AS 'c' ON c.id = ic.company
+LEFT JOIN [country_ISO3166-1] AS 'iso' ON iso.code = c.country
+WHERE  ic.developer = 1
+GROUP BY g.id;
 
 DROP VIEW IF EXISTS [v_simple_publishers];
 CREATE VIEW [v_simple_publishers] AS
