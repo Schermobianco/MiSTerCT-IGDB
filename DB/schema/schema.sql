@@ -654,7 +654,7 @@ SELECT
     json_each.value AS 'release_dates',
     reldates_table.human AS 'date',
     reldates_table.region AS 'region',
-    region_table.name AS 'name',
+    region_table.name AS 'region_name',
     reldates_table.platform AS 'platform'
 FROM
     games AS 'games_table',
