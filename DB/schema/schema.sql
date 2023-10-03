@@ -489,34 +489,16 @@ FROM
 ORDER BY games_table.id;
 
 DROP VIEW IF EXISTS [v_agr_game_modes];
-CREATE VIEW [v_agr_game_modes]
-AS
+CREATE VIEW [v_agr_game_modes] AS
 SELECT
-       [id],
-       '[' || GROUP_CONCAT ([game_modes], '][') || ']' AS [game_modes],
-       GROUP_CONCAT ([game_modes_name], ', ') AS [game_modes_name]
-FROM   (WITH RECURSIVE
-          [split]([id], [game_modes], [str]) AS(
-            SELECT
-                   [id],
-                   '',
-                   REPLACE (REPLACE (REPLACE ([game_modes], '][', ','), ']', ''), '[', '') || ','
-            FROM   [games]
-            UNION ALL
-            SELECT
-                   [id],
-                   SUBSTR ([str], 0, INSTR ([str], ',')),
-                   SUBSTR ([str], INSTR ([str], ',') + 1)
-            FROM   [split]
-            WHERE  [str] != ''
-          )
-        SELECT
-               [split].[id],
-               [split].[game_modes],
-               [game_modes].[name] AS [game_modes_name]
-        FROM   [split]
-               JOIN [game_modes] ON [game_modes].[id] = [split].[game_modes]) t
-GROUP  BY [id];
+	g.id AS 'id',
+	g.game_modes AS 'game_modes',
+	GROUP_CONCAT(gm.name, ', ') AS 'game_modes_name'
+FROM
+	games AS 'g',
+	json_each(g.game_modes) AS jj
+JOIN game_modes AS gm ON gm.id = jj.value
+GROUP BY g.id;
 
 DROP VIEW IF EXISTS [v_simple_game_modes];
 CREATE VIEW [v_simple_game_modes] AS
