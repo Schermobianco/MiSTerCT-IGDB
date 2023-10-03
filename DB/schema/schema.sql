@@ -442,27 +442,16 @@ ORDER
        BY games_table.id;
 
 DROP VIEW IF EXISTS v_agr_genres;
-CREATE VIEW v_agr_genres
-AS
-SELECT id, '['||group_concat(genres, '][')||']' AS 'genres', group_concat(genres_name, ', ') AS 'genres_name' FROM
-(
-       WITH RECURSIVE split(id, genres, str) AS (
-              SELECT id, '',
-              REPLACE(REPLACE(REPLACE(genres,'][',','),']',''),'[','')||',' FROM games
-              UNION ALL SELECT
-              id,
-              substr(str, 0, instr(str, ',')),
-              substr(str, instr(str, ',')+1)
-              FROM split WHERE str!=''
-       )
-       SELECT split.id, split.genres, genres.name as 'genres_name'
-       FROM split
-
-       JOIN
-       genres ON genres.id = split.genres
-
-) t
-GROUP BY id;
+CREATE VIEW v_agr_genres AS
+SELECT
+	g.id AS 'id',
+	g.genres  AS 'genres',
+	GROUP_CONCAT(gen.name, ', ') AS 'genres_name'
+FROM
+	games AS g,
+	json_each(g.genres) AS jj
+LEFT JOIN genres AS gen ON gen.id = jj.value
+GROUP BY g.id;
 
 DROP VIEW IF EXISTS [v_simple_genres];
 CREATE VIEW [v_simple_genres] AS SELECT
