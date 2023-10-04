@@ -1,37 +1,45 @@
+import logging
+import os.path
 from igdb_api_class import IGDBAPI
 from db_class import DATABASE
-import os.path
+from dotenv import load_dotenv
+from pathlib import Path
+import shutil
+
+# load the needed env vars.
+# order is: os env first, .env file second. (see https://pypi.org/project/python-dotenv/)
+load_dotenv(override=False)
+
+DATABASE_FILE_NAME = "IGDB_megafull_test.db"
+LOGLEVEL = os.environ.get('LOGLEVEL', 'DEBUG').upper()
+logging.basicConfig(level=LOGLEVEL)
+logger = logging.getLogger("db_fill")
 
 # get current working directory
-path = os.getcwd()
-
-path = f"{path}{os.sep}DB"
-path = os.path.normpath(path)
+path = os.path.join(os.getcwd(), "DB")
 
 BASE_DIR = path
 
 def file_exist(path):
     check_file = os.path.isfile(path)
-
     return check_file
 
-def copy_file(source,destination):
-    os.popen(f'copy "{source}" "{destination}"')
+def copy_file(source, destination):
+    ## use this lib for better cross-os compatibility
+    shutil.copy2(source, destination)
 
 def fill_db(platform_filter = "All"):
-    db_file = "IGDB.db" 
-    db_file_empty = "IGDB_empty.db"
-
-    db_path = os.path.join(BASE_DIR, db_file )
-    db_path_empty = os.path.join(BASE_DIR, db_file_empty)
-
-    if not file_exist(db_path): 
+    db_path = os.path.join(BASE_DIR, DATABASE_FILE_NAME)
+    if not file_exist(db_path):
+        logger.info(f'db not found, creating new empty db....')
+        db_path_empty = DATABASE.create_empty_db()
+        logger.info(f'start new db in {db_path} (from empty {db_path_empty})');
         if file_exist(db_path_empty):
-            copy_file(db_path_empty,db_path)
+            copy_file(db_path_empty, db_path)
+            logger.info(f'copied emty into {db_path}.');
         else:
-            print(f"<Error! - FILL DB> Empty DB is missing: {db_path_empty}")
+            logger.error(f"<Error! - FILL DB> Empty DB is missing: {db_path_empty}")
             return
-
     #  request from IGDB the tables
     platforms = IGDBAPI("platforms","platforms","fields *").retrieve_data()
     genres = IGDBAPI("genres", "genres", "fields *").retrieve_data()
@@ -46,12 +54,12 @@ def fill_db(platform_filter = "All"):
     collections = IGDBAPI('collections','collections','fields *').retrieve_data()
     age_ratings = IGDBAPI('age_ratings','age_ratings','fields *').retrieve_data()
     game_localizations = IGDBAPI('game_localizations','game_localizations','fields *').retrieve_data()
-    
+
     #  request from IGDB the tables (platforms filtered)
     if platform_filter == 'All':
         games = IGDBAPI('games','games','fields *').retrieve_data()
         game_engines = IGDBAPI('game_engines','game_engines','fields *').retrieve_data()
-        
+
     else:
         games = IGDBAPI(
             f"games_{platform_filter}",
@@ -66,7 +74,7 @@ def fill_db(platform_filter = "All"):
             f"where platforms = ({platform_filter})",
         ).retrieve_data()
 
-    with DATABASE("IGDB.db") as db:
+    with DATABASE(db_path, '') as db:
         # tune db
         db.tune()
 
@@ -88,11 +96,15 @@ def fill_db(platform_filter = "All"):
         db.list_to_db(age_ratings, "age_ratings",empty_table)
         db.list_to_db(game_localizations, "game_localizations",empty_table)
 
-        # create agr table
-        db.create_agr_table(platform_filter)
+        # create agr table, needed?
+        # db.create_agr_table(platform_filter)
 
         # optimize db
         db.optimize()
+
+    logger.info(f'db populated: {db_path}');
+    logger.info(f'can safely remove {db_path_empty}');
+    logger.info(f'bye.');
 
 if __name__ == "__main__":
     platforms = "4,7,18,19,22,29,30,32,33,35,57,58,59,60,61,62,64,66,67,68,70,78,79,80,84,86,88,99,119,120,136,150,160"
