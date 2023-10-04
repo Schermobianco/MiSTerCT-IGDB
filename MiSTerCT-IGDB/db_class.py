@@ -223,7 +223,8 @@ class DATABASE():
     @staticmethod
     def create_empty_db(newdbname = f"temp-db-file-{datetime.datetime.now().timestamp()}.db"):
         # uses the schema.sql to create a new empty database
-        db_path = os.path.join(os.getcwd(), newdbname)
+        os.makedirs(os.path.join(os.getcwd(), '.tmp'), exist_ok=True)
+        db_path = os.path.join(os.getcwd(), '.tmp', newdbname)
         try:
             schema = Path(SCHEMA_FILE_PATH).read_text()
 

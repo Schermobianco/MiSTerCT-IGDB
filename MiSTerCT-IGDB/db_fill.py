@@ -29,7 +29,9 @@ def copy_file(source, destination):
     shutil.copy2(source, destination)
 
 def fill_db(platform_filter = "All"):
+    os.makedirs(os.path.join(os.getcwd(), '.tmp'), exist_ok=True)
     db_path = os.path.join(BASE_DIR, DATABASE_FILE_NAME)
+    db_path_empty = 0 # init 0, needed later to control the logs
     if not file_exist(db_path):
         logger.info(f'db not found, creating new empty db....')
         db_path_empty = DATABASE.create_empty_db()
@@ -103,7 +105,8 @@ def fill_db(platform_filter = "All"):
         db.optimize()
 
     logger.info(f'db populated: {db_path}');
-    logger.info(f'can safely remove {db_path_empty}');
+    if db_path_empty != 0:
+        logger.info(f'can safely remove {db_path_empty}');
     logger.info(f'bye.');
 
 if __name__ == "__main__":

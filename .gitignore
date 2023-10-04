@@ -184,3 +184,6 @@ IGDB.db*
 
 # macOs files
 .DS_Store
+
+# our tmp
+.tmp

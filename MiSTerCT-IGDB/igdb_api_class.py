@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from igdb.wrapper import IGDBWrapper
 from twitch_token import get_access_token
+from file_export import export_list_to_csv
 import joblib
 import json
 import logging
@@ -15,7 +16,6 @@ logging.basicConfig(level=LOGLEVEL)
 
 logger = logging.getLogger("igdb_api_class")
 
-from file_export import export_list_to_csv
 
 THREAD_COUNT = 4  # numero massimo di thread per interrgogare IGDB max 4 al secondo
 MIN_TIME = 1  # ritardo in secondi tra le richieste ai thread (in secondi)
@@ -36,7 +36,7 @@ class IGDBAPI:
         self.where = where
         self.wrapper = 0 ## init later
         self.threadList = []
-        self.filename = f"{name}.sav"
+        self.filename = os.path.join('.tmp', 'sav', f"{name}.sav")
         self.counted = 0
         self.saveBin = saveBin
         self.saveCSV = saveCSV
@@ -44,6 +44,7 @@ class IGDBAPI:
     def load_data(self):
         if self.saveBin:
             try:
+                os.makedirs(os.path.join('.tmp', 'sav'), exist_ok=True)
                 self.threadList = joblib.load(self.filename)
                 logger.info(f"<load_data! reusing {self.filename}")
                 return self.threadList
@@ -52,6 +53,7 @@ class IGDBAPI:
                 self.threadList = []
                 return self.threadList
         else:
+            self.wrapper = createIGDBWrapper()
             self.threadList = []
             return self.threadList
 
