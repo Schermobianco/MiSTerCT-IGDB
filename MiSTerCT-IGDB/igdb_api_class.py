@@ -1,13 +1,21 @@
+from dotenv import load_dotenv
 from igdb.wrapper import IGDBWrapper
 from twitch_token import get_access_token
-import joblib
-import threading
-import queue
-import time
-import json
-import os
-
 from file_export import export_list_to_csv
+import joblib
+import json
+import logging
+import os
+import queue
+import threading
+import time
+
+load_dotenv(override=False)
+LOGLEVEL = os.environ.get('LOGLEVEL', 'DEBUG').upper()
+logging.basicConfig(level=LOGLEVEL)
+
+logger = logging.getLogger("igdb_api_class")
+
 
 THREAD_COUNT = 4  # numero massimo di thread per interrgogare IGDB max 4 al secondo
 MIN_TIME = 1  # ritardo in secondi tra le richieste ai thread (in secondi)
@@ -21,14 +29,14 @@ def createIGDBWrapper():
 
 
 class IGDBAPI:
-    def __init__(self, name, endPoint, fields, where="", saveBin :bool = False , saveCSV :bool = False):
+    def __init__(self, name, endPoint, fields, where="", saveBin :bool = True , saveCSV :bool = False):
         self.name = name
         self.endPoint = endPoint
         self.fields = fields
         self.where = where
-        self.wrapper = createIGDBWrapper()
+        self.wrapper = 0 ## init later
         self.threadList = []
-        self.filename = f"{name}.sav"
+        self.filename = os.path.join('.tmp', 'sav', f"{name}.sav")
         self.counted = 0
         self.saveBin = saveBin
         self.saveCSV = saveCSV
@@ -36,12 +44,16 @@ class IGDBAPI:
     def load_data(self):
         if self.saveBin:
             try:
+                os.makedirs(os.path.join('.tmp', 'sav'), exist_ok=True)
                 self.threadList = joblib.load(self.filename)
+                logger.info(f"<load_data! reusing {self.filename}")
                 return self.threadList
             except Exception:
+                self.wrapper = createIGDBWrapper()
                 self.threadList = []
                 return self.threadList
         else:
+            self.wrapper = createIGDBWrapper()
             self.threadList = []
             return self.threadList
 
@@ -118,7 +130,8 @@ class IGDBAPI:
         self.load_data()
 
         # if not empty i return it (is form .sav file)
-        if self.threadList != []: return self.threadList
+        if self.threadList != []:
+            return self.threadList
 
         q = queue.Queue()
 
@@ -130,7 +143,7 @@ class IGDBAPI:
 
         self.count_records()
         print('')
-        print('<STARTED - IGDB> ' + self.name + " - records: " + str(self.counted))
+        print(f'<STARTED - IGDB> {self.name} - records: " {str(self.counted)}')
         for i in range(0, int(self.counted / 500) + 1):
             offset = i * 500
             q.put(offset)
