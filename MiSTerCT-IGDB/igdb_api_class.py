@@ -21,7 +21,15 @@ def createIGDBWrapper():
 
 
 class IGDBAPI:
-    def __init__(self, name, endPoint, fields, where="", saveBin :bool = False , saveCSV :bool = False):
+    def __init__(
+        self,
+        name,
+        endPoint,
+        fields,
+        where="",
+        saveBin: bool = False,
+        saveCSV: bool = False,
+    ):
         self.name = name
         self.endPoint = endPoint
         self.fields = fields
@@ -46,7 +54,9 @@ class IGDBAPI:
             return self.threadList
 
     def count_records(self):
-        byte_array = self.wrapper.api_request(f"{self.endPoint}/count", f"{self.where};")
+        byte_array = self.wrapper.api_request(
+            f"{self.endPoint}/count", f"{self.where};"
+        )
         json_string = byte_array.decode()
         json_list = json.loads(json_string)
         self.counted = json_list["count"]
@@ -67,7 +77,12 @@ class IGDBAPI:
             try:
                 byte_array = self.wrapper.api_request(
                     self.endPoint,
-                    self.fields + "; " + where + " offset " + str(offset) + "; limit 500;",
+                    self.fields
+                    + "; "
+                    + where
+                    + " offset "
+                    + str(offset)
+                    + "; limit 500;",
                 )
                 j = byte_array.decode()
                 lout = json.loads(j)
@@ -96,7 +111,10 @@ class IGDBAPI:
             "                                                                                                                                                               ",
             end="\r",
         )
-        print('<WORKING - IGDB> ' + self.name + " - processed: " + str(perc) + "%", end="\r")
+        print(
+            "<WORKING - IGDB> " + self.name + " - processed: " + str(perc) + "%",
+            end="\r",
+        )
 
         self.threadList.extend(lout)
 
@@ -118,7 +136,8 @@ class IGDBAPI:
         self.load_data()
 
         # if not empty i return it (is form .sav file)
-        if self.threadList != []: return self.threadList
+        if self.threadList != []:
+            return self.threadList
 
         q = queue.Queue()
 
@@ -129,8 +148,8 @@ class IGDBAPI:
             t.start()
 
         self.count_records()
-        print('')
-        print('<STARTED - IGDB> ' + self.name + " - records: " + str(self.counted))
+        print("")
+        print("<STARTED - IGDB> " + self.name + " - records: " + str(self.counted))
         for i in range(0, int(self.counted / 500) + 1):
             offset = i * 500
             q.put(offset)
@@ -140,8 +159,7 @@ class IGDBAPI:
             "                                                                                                                                                               ",
             end="\r",
         )
-        print('<DONE - IGDB> Finished')
-
+        print("<DONE - IGDB> Finished")
 
         for _ in threads:
             q.put(None)
@@ -149,7 +167,8 @@ class IGDBAPI:
         for t in threads:
             t.join()
 
-        if self.saveBin: joblib.dump(self.threadList, self.filename)
+        if self.saveBin:
+            joblib.dump(self.threadList, self.filename)
 
         if self.saveCSV:
             try:
