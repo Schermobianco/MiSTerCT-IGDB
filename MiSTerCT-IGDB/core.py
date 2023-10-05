@@ -10,7 +10,8 @@ from config_dicts import replacements_dict, regionEnum_dict, region_dict
 from db_class import DATABASE
 import pandas as pd
 
-def prepare_names_df(df_column :pd.DataFrame):
+
+def prepare_names_df(df_column: pd.DataFrame):
     for key, value in replacements_dict.items():
         df_column = df_column.str.replace(key, value)
 
@@ -92,17 +93,19 @@ def get_file_region(fileName: str):
 
     return None
 
+
 def get_region_name(regionNum: str):
-    if regionNum is None: return '<NOT FOUND>'
+    if regionNum is None:
+        return "<NOT FOUND>"
 
     return regionEnum_dict[regionNum]
 
 
-def get_db_names(tableName,platforms):
+def get_db_names(tableName, platforms):
     with DATABASE("IGDB.db") as db:
-        return db.get_v_names(tableName,platforms)
-    
-def get_db_data(tableName,platforms):
+        return db.get_v_names(tableName, platforms)
+
+
+def get_db_data(tableName, platforms):
     with DATABASE("IGDB.db") as db:
-        return db.get_v_data(tableName,platforms)
-        
+        return db.get_v_data(tableName, platforms)

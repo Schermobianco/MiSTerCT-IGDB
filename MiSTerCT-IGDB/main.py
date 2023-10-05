@@ -7,10 +7,10 @@ from core import (
     prepare_string,
     fuzzy_search,
     get_db_names,
-    get_db_data
+    get_db_data,
 )
 
-import csv # -- TO REMOVE
+import csv  # -- TO REMOVE
 
 # Set the default encoding to UTF-8.
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -22,19 +22,18 @@ if __name__ == "__main__":
     # for info about platforms ID check INFO\platformsID.txt file
     platforms = "19,58"
 
-    df_data = get_db_data('v_agr_all',platforms)
-    df_data = df_data.set_index('id')
+    df_data = get_db_data("v_agr_all", platforms)
+    df_data = df_data.set_index("id")
 
+    df_names_off = get_db_names("v_official_names_regions", platforms)
+    df_names_off = df_names_off.set_index("id")
 
-    df_names_off = get_db_names('v_official_names_regions',platforms)
-    df_names_off = df_names_off.set_index('id')
-
-    df_names_alt = get_db_names('v_alternative_names_regions',platforms)
-    df_names_alt = df_names_alt.set_index('id')
+    df_names_alt = get_db_names("v_alternative_names_regions", platforms)
+    df_names_alt = df_names_alt.set_index("id")
 
     # tratto la colonna nomi dove cercare
-    df_names_off['name'] = prepare_names_df(df_names_off['name'])
-    df_names_alt['name'] = prepare_names_df(df_names_alt['name'])
+    df_names_off["name"] = prepare_names_df(df_names_off["name"])
+    df_names_alt["name"] = prepare_names_df(df_names_alt["name"])
 
     # fronm directory
     # files = get_files_from_dir(path_source)
@@ -92,17 +91,28 @@ if __name__ == "__main__":
 
         if fregion == None:
             # search game name inside official name df WITHOUT REGION
-            mostaccurate = fuzzy_search(df_names_off['name'], gname, 89)
+            mostaccurate = fuzzy_search(df_names_off["name"], gname, 89)
         else:
             # search game name inside official name df WITH REGION
-            mostaccurate = fuzzy_search(df_names_off.loc[df_names_off['region'] == int(fregion)]['name'], gname, 89)
+            mostaccurate = fuzzy_search(
+                df_names_off.loc[df_names_off["region"] == int(fregion)]["name"],
+                gname,
+                89,
+            )
             # search game name inside alternative name df WITH REGION
-            if mostaccurate == None: mostaccurate = fuzzy_search(df_names_alt.loc[df_names_alt['region'] == int(fregion)]['name'], gname, 89)
+            if mostaccurate == None:
+                mostaccurate = fuzzy_search(
+                    df_names_alt.loc[df_names_alt["region"] == int(fregion)]["name"],
+                    gname,
+                    89,
+                )
 
         # search game name inside official name df WITHOUT REGION
-        if mostaccurate == None: mostaccurate = fuzzy_search(df_names_off['name'], gname, 89)
+        if mostaccurate == None:
+            mostaccurate = fuzzy_search(df_names_off["name"], gname, 89)
         # search game name inside alternative name df WITHOUT REGION
-        if mostaccurate == None: mostaccurate = fuzzy_search(df_names_alt['name'], gname, 89)
+        if mostaccurate == None:
+            mostaccurate = fuzzy_search(df_names_alt["name"], gname, 89)
 
         if mostaccurate == None or isinstance(mostaccurate, bool):
             out = f, gname, "", "<NOT FOUND>"
@@ -116,11 +126,17 @@ if __name__ == "__main__":
             # mostaccurate[0] = text found
             # mostaccurate[1] = score
             # mostaccurate[2] = game id
-            out = f, gname, mostaccurate[2], mostaccurate[0], int(mostaccurate[1]), get_region_name(fregion),
+            out = (
+                f,
+                gname,
+                mostaccurate[2],
+                mostaccurate[0],
+                int(mostaccurate[1]),
+                get_region_name(fregion),
+            )
             # print(f"all good, found values -> {mostaccurate} | {mostaccurate[0]} | {mostaccurate[1]}")
-            #df_data.iloc[mostaccurate[2]]['name'],
-            #df_data.loc[(df_data['id'] == mostaccurate[2]) & (df_data['B'] == 'c')]['name'],
-
+            # df_data.iloc[mostaccurate[2]]['name'],
+            # df_data.loc[(df_data['id'] == mostaccurate[2]) & (df_data['B'] == 'c')]['name'],
 
             # df_data.iloc[int(mostaccurate[2])]['region_name'],
             # df_data.iloc[mostaccurate[2]]['date'],
@@ -129,7 +145,6 @@ if __name__ == "__main__":
             # df_data.iloc[mostaccurate[2]]['developers_name']
             print(out)
             found += 1
-
 
             # --- EXPORT CSV -- TO REMOVE
             wr.writerow(out)
