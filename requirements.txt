@@ -5,3 +5,5 @@ rapidfuzz==3.2.0
 requests==2.31.0
 python-dotenv==1.0.0
 sqlean.py==0.21.8.4
+click==8.1.7
+rich==13.6.0
