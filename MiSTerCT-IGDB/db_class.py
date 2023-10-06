@@ -17,6 +17,7 @@ logger = logging.getLogger("db_class")
 # get current working directory
 BASE_DIR = os.path.join(os.getcwd(), "DB")
 SCHEMA_FILE_PATH = os.path.join(BASE_DIR, "schema", "schema.sql")
+DB_DATA_FILE_PATH = os.path.join(BASE_DIR, "schema", "base-data.sql")
 
 """
 VIEW:
@@ -148,6 +149,24 @@ class DATABASE:
 
         self.db_conn.commit()
 
+    def create_selected_platforms_table(self, platforms: str = None):
+        table_name = "platforms#selected"
+        if platforms is not None:
+            where = f"WHERE p.id in ({platforms})"
+
+        queryscript = f"""
+DROP VIEW IF EXISTS '{table_name}';
+CREATE VIEW IF NOT EXISTS '{table_name}' AS
+SELECT id, abbreviation FROM platforms as p {where};
+"""
+        try:
+            self.db_cur.executescript(queryscript)
+        except Exception as e:
+            print(f"<Error! - SQL> Create Table: {e}")
+            return
+
+        self.db_conn.commit()
+
     def list_to_db(self, inputList, tableName, emptyBefore: bool = False):
         if not self.table_exist(tableName):
             logger.error(f"<Error! - SQL> Table '{tableName}' not found")
@@ -224,6 +243,7 @@ class DATABASE:
         db_path = os.path.join(os.getcwd(), ".tmp", newdbname)
         try:
             schema = Path(SCHEMA_FILE_PATH).read_text()
+            dbdata = Path(DB_DATA_FILE_PATH).read_text()
 
             db_conn = sqlite3.connect(db_path)
             db_conn.enable_load_extension(True)
@@ -231,6 +251,10 @@ class DATABASE:
             cur = db_conn.cursor()
             cur.executescript(schema)
             db_conn.commit()
+
+            cur.executescript(dbdata)
+            db_conn.commit()
+
             db_conn.close()
             print(f"created: {db_path}")
             return db_path

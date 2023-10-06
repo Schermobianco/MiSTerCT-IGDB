@@ -245,24 +245,7 @@ CREATE TABLE IF NOT EXISTS "game_localizations" (
        "updated_at"	INTEGER,
        PRIMARY KEY("id")
 );
-CREATE TABLE IF NOT EXISTS t_agr_all(
-  id INT,
-  name TEXT,
-  platform INT,
-  platform_name TEXT,
-  platform_category TEXT,
-  region_name TEXT,
-  date TEXT,
-  collection_name,
-  category_name,
-  game_modes_name,
-  player_perspectives_name,
-  genres_name,
-  franchise,
-  publishers_name,
-  developers_name,
-  game_engines_name
-);
+
 CREATE INDEX IF NOT EXISTS [games_gameID] ON [games]([id]);
 CREATE INDEX IF NOT EXISTS [alternative_names_gameID] ON [alternative_names]([game]);
 CREATE INDEX IF NOT EXISTS [involved_companies_gameID] ON [involved_companies]([game]);
@@ -575,3 +558,30 @@ FROM
 ORDER BY
     id;
 /* No STAT tables available */
+
+
+
+-- CREATE TABLE IF NOT EXISTS t_agr_all(
+--   id INT,
+--   name TEXT,
+--   platform INT,
+--   platform_name TEXT,
+--   platform_category TEXT,
+--   region_name TEXT,
+--   date TEXT,
+--   collection_name,
+--   category_name,
+--   game_modes_name,
+--   player_perspectives_name,
+--   genres_name,
+--   franchise,
+--   publishers_name,
+--   developers_name,
+--   game_engines_name
+-- );
+
+DROP VIEW IF EXISTS [t_agr_all];
+CREATE VIEW t_agr_all AS
+SELECT *
+FROM v_agr_all
+WHERE platform in (SELECT id from "platforms#selected");

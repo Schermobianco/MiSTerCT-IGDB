@@ -113,8 +113,12 @@ def fill_db(platform_filter="All"):
         db.list_to_db(age_ratings, "age_ratings", empty_table)
         db.list_to_db(game_localizations, "game_localizations", empty_table)
 
+        ## todo remove this
         # create agr table, needed?
         # db.create_agr_table(platform_filter)
+
+        # prepare the selected platform to be used as a filter later
+        db.create_selected_platforms_table(platform_filter)
 
         # optimize db
         db.optimize()
