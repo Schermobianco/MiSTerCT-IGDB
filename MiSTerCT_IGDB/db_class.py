@@ -258,5 +258,5 @@ SELECT id, abbreviation FROM platforms as p {where};
             db_conn.close()
             print(f"created: {db_path}")
             return db_path
-        except:
-            raise f"unable to create db {db_path}"
+        except Exception as e:
+            raise f"unable to create db {db_path} with error {e}"

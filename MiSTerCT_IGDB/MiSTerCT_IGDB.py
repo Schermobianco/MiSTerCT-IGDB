@@ -34,7 +34,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
     "--db",
     default="DB/IGDB.db",
     help="DB file name and path",
-    type=click.Path(exists=True)
+    type=click.Path(exists=True),
 )
 @click.option("--region", default="1", help="Region ID to search")
 def cli(source, output, platforms, db, region):
