@@ -217,6 +217,8 @@ SELECT id, abbreviation FROM platforms as p {where};
 
         where = f"WHERE platform in ({platforms})"
 
+        print(f"QUERY: ", query + where)
+
         try:
             return pd.read_sql_query(query + where, self.db_conn)
         except Exception as e:
