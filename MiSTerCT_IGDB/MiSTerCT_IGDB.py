@@ -44,10 +44,9 @@ def cli(source, output, platforms, db, region):
     output_path = os.path.abspath(output)
     db_path = os.path.abspath(db)
 
-    print(f"Source: {source_path}")
+    print(f"Source path: {source_path}")
     print(f"Output: {output_path}")
     print(f"DB: {db_path}")
-    print(f"Platforms: {platforms}")
 
     df_data = get_data(db_path, platforms)
     df_names_off = get_official_names(db_path, platforms)
