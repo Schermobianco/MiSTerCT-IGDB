@@ -4,6 +4,7 @@ import csv
 from rapidfuzz import process
 from rich.console import Console
 from rich.table import Table
+from timeit import default_timer as timer
 
 from config_dicts import replacements_dict, regionEnum_dict, region_dict
 from db_class import DATABASE
@@ -247,7 +248,7 @@ def write_csv(file_path, data):
             wr.writerow(row)
 
 
-def print_results(found, not_found):
+def print_results(found, not_found, start = False):
     console = Console()
 
     table = Table(show_header=True, header_style="bold magenta")
@@ -262,3 +263,7 @@ def print_results(found, not_found):
 
     percentage = (100 / (found + not_found)) * found
     console.print(f"\nPercentage: [bold green]{percentage:.2f}%[/bold green]")
+
+    if start != False:
+        duration = f"{round(timer() - start, 2)}s"
+        console.print(f"[grey30]Duration: {duration}[/grey30]")
