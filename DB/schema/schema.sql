@@ -531,23 +531,32 @@ GROUP BY
 DROP VIEW IF EXISTS [v_agr_developers];
 
 CREATE VIEW [v_agr_developers] AS
+WITH wcompanies AS (
+	SELECT
+    ic.id AS 'iid',
+		ic.company AS 'cid',
+		c.name AS 'name',
+		isocode.alpha2 AS 'alpha2'
+	FROM
+		involved_companies AS 'ic'
+		LEFT JOIN 'companies' AS 'c' on ic.company = c.id
+		LEFT JOIN [country_ISO3166-1] AS 'isocode' ON isocode.code = c.country
+	WHERE
+		ic.developer = 1
+)
 SELECT
-  g.id AS 'id',
-  JSON('[' || GROUP_CONCAT(ic.company) || ']') AS 'developers',
-  GROUP_CONCAT(
-    c.name || COALESCE(' (' || iso.alpha2 || ')', ''),
-    ', '
-  ) AS 'developers_name'
+	games.id AS 'id',
+	JSON('[' || GROUP_CONCAT(wcompanies.cid) || ']') AS 'developers',
+	GROUP_CONCAT(
+		wcompanies.name || COALESCE(' (' || wcompanies.alpha2 || ')', ''),
+		', '
+	) AS 'developers_name'
 FROM
-  games AS 'g',
-  json_each(g.involved_companies) AS 'games_ic'
-  LEFT JOIN involved_companies AS 'ic' ON ic.id = games_ic.value
-  LEFT JOIN companies AS 'c' ON c.id = ic.company
-  LEFT JOIN [country_ISO3166-1] AS 'iso' ON iso.code = c.country
-WHERE
-  ic.developer = 1
+	games AS 'games',
+	json_each(games.involved_companies) AS 'jj'
+	LEFT JOIN wcompanies on wcompanies.iid = jj.value
 GROUP BY
-  g.id;
+	games.id;
 
 DROP VIEW IF EXISTS [v_simple_publishers];
 
