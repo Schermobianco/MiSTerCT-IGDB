@@ -308,7 +308,7 @@ CREATE VIEW [v_simple_games] AS
 SELECT
   games.id,
   games.name,
-  Null as comment,
+  Null AS comment,
   platforms,
   games.release_dates,
   games.genres,
@@ -346,7 +346,7 @@ DROP VIEW IF EXISTS [v_alternative_names];
 
 CREATE VIEW [v_alternative_names] AS
 SELECT
-  alternative_names.game as 'id',
+  alternative_names.game AS 'id',
   alternative_names.name,
   alternative_names.comment,
   games.platforms
@@ -391,7 +391,7 @@ SELECT
 FROM
   (
     SELECT
-      alternative_names.game as 'id',
+      alternative_names.game AS 'id',
       alternative_names.name,
       alternative_names.comment,
       v_simple_releases.region,
@@ -427,9 +427,9 @@ FROM
     SELECT
       games.id,
       games.name,
-      'Official' as comment,
+      'Official' AS comment,
       platforms,
-      '1' as 'ord',
+      '1' AS 'ord',
       Null
     FROM
       games
@@ -439,7 +439,7 @@ FROM
       alternative_names.name,
       alternative_names.comment,
       games.platforms,
-      '2' as 'ord',
+      '2' AS 'ord',
       alternative_names.id
     FROM
       games
@@ -463,7 +463,7 @@ CREATE VIEW [v_simple_releases] AS WITH wdates AS (
     region_table.name AS 'region_name'
   FROM
     release_dates AS 'reldates_table'
-    LEFT join [release_dates#region] AS 'region_table' ON reldates_table.region = region_table.value
+    LEFT JOIN [release_dates#region] AS 'region_table' ON reldates_table.region = region_table.value
     LEFT JOIN platforms AS 'platforms_table' ON reldates_table.platform = platforms_table.id
 )
 SELECT
@@ -475,7 +475,7 @@ SELECT
   wdates.platform AS 'platform'
 FROM
   games AS 'games',
-  json_each(games.release_dates) AS 'jj'
+  JSON_EACH(games.release_dates) AS 'jj'
   LEFT JOIN wdates ON wdates.id = jj.value
 ORDER BY
   games.id;
@@ -490,21 +490,27 @@ CREATE VIEW [v_agr_publishers] AS WITH wcompanies AS (
     isocode.alpha2 AS 'alpha2',
     (
       c.name || COALESCE(' (' || isocode.alpha2 || ')', '')
-    ) as 'formated_name'
+    ) AS 'formated_name'
   FROM
     involved_companies AS 'ic'
-    LEFT JOIN 'companies' AS 'c' on ic.company = c.id
+    LEFT JOIN 'companies' AS 'c' ON ic.company = c.id
     LEFT JOIN [country_ISO3166-1] AS 'isocode' ON isocode.code = c.country
   WHERE
     ic.publisher = 1
 )
 SELECT
   games.id AS 'id',
-  JSON('[' || GROUP_CONCAT(wcompanies.cid) || ']') AS 'publishers',
-  GROUP_CONCAT(wcompanies.formated_name, ', ') AS 'publishers_name'
+  JSON_GROUP_ARRAY(wcompanies.cid) FILTER (
+    WHERE
+      wcompanies.cid IS NOT NULL
+  ) AS 'publishers',
+  JSON_GROUP_ARRAY(wcompanies.formated_name) FILTER (
+    WHERE
+      wcompanies.formated_name IS NOT NULL
+  ) AS 'publishers_name'
 FROM
   games AS 'games',
-  json_each(games.involved_companies) AS 'jj'
+  JSON_EACH(games.involved_companies) AS 'jj'
   LEFT JOIN wcompanies on wcompanies.iid = jj.value
 GROUP BY
   games.id;
@@ -519,7 +525,7 @@ CREATE VIEW [v_agr_developers] AS WITH wcompanies AS (
     isocode.alpha2 AS 'alpha2',
     (
       c.name || COALESCE(' (' || isocode.alpha2 || ')', '')
-    ) as 'formated_name'
+    ) AS 'formated_name'
   FROM
     involved_companies AS 'ic'
     LEFT JOIN 'companies' AS 'c' on ic.company = c.id
@@ -529,11 +535,17 @@ CREATE VIEW [v_agr_developers] AS WITH wcompanies AS (
 )
 SELECT
   games.id AS 'id',
-  JSON('[' || GROUP_CONCAT(wcompanies.cid) || ']') AS 'developers',
-  GROUP_CONCAT(wcompanies.formated_name, ', ') AS 'developers_name'
+  JSON_GROUP_ARRAY(wcompanies.cid) FILTER (
+    WHERE
+      wcompanies.cid IS NOT NULL
+  ) AS 'developers',
+  JSON_GROUP_ARRAY(wcompanies.formated_name) FILTER (
+    WHERE
+      wcompanies.formated_name IS NOT NULL
+  ) AS 'developers_name'
 FROM
   games AS 'games',
-  json_each(games.involved_companies) AS 'jj'
+  JSON_EACH(games.involved_companies) AS 'jj'
   LEFT JOIN wcompanies on wcompanies.iid = jj.value
 GROUP BY
   games.id;
@@ -543,16 +555,16 @@ DROP VIEW IF EXISTS [v_simple_publishers];
 CREATE VIEW [v_simple_publishers] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'involved_companies',
+  JSON_EACH.value AS 'involved_companies',
   companies_table.id AS 'companies',
   companies_table.name AS 'companies_name',
   IFNULL(country_table.alpha2, '') AS 'CC'
 FROM
   games AS 'games_table',
-  json_each(games_table.involved_companies)
-  LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = json_each.value
+  JSON_EACH(games_table.involved_companies)
+  LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = JSON_EACH.value
   LEFT JOIN companies AS 'companies_table' ON companies_table.id = involved_companies_table.company
-  LEFT JOIN [country_ISO3166-1] as 'country_table' ON country_table.code = companies_table.country
+  LEFT JOIN [country_ISO3166-1] AS 'country_table' ON country_table.code = companies_table.country
 WHERE
   involved_companies_table.publisher = 1
 ORDER BY
@@ -563,16 +575,16 @@ DROP VIEW IF EXISTS [v_simple_developers];
 CREATE VIEW [v_simple_developers] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'involved_companies',
+  JSON_EACH.value AS 'involved_companies',
   companies_table.id AS 'companies',
   companies_table.name AS 'companies_name',
   IFNULL('(' || country_table.alpha2 || ')', '') AS 'CC'
 FROM
   games AS 'games_table',
-  json_each(games_table.involved_companies)
-  LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = json_each.value
+  JSON_EACH(games_table.involved_companies)
+  LEFT JOIN involved_companies AS 'involved_companies_table' ON involved_companies_table.id = JSON_EACH.value
   LEFT JOIN companies AS 'companies_table' ON companies_table.id = involved_companies_table.company
-  LEFT JOIN [country_ISO3166-1] as 'country_table' ON country_table.code = companies_table.country
+  LEFT JOIN [country_ISO3166-1] AS 'country_table' ON country_table.code = companies_table.country
 WHERE
   involved_companies_table.developer = 1
 ORDER BY
@@ -587,7 +599,7 @@ SELECT
   GROUP_CONCAT(gen.name, ', ') AS 'genres_name'
 FROM
   games AS g,
-  json_each(g.genres) AS jj
+  JSON_EACH(g.genres) AS jj
   LEFT JOIN genres AS gen ON gen.id = jj.value
 GROUP BY
   g.id;
@@ -597,12 +609,12 @@ DROP VIEW IF EXISTS [v_simple_genres];
 CREATE VIEW [v_simple_genres] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'genres',
+  JSON_EACH.value AS 'genres',
   genres_table.name AS 'player_perspectives_name'
 FROM
   games AS 'games_table',
-  json_each(games_table.genres)
-  LEFT JOIN genres AS 'genres_table' ON genres_table.id = json_each.value
+  JSON_EACH(games_table.genres)
+  LEFT JOIN genres AS 'genres_table' ON genres_table.id = JSON_EACH.value
 ORDER BY
   games_table.id;
 
@@ -615,7 +627,7 @@ SELECT
   GROUP_CONCAT(p.name, ', ') AS 'player_perspectives_name'
 FROM
   games AS g,
-  json_each(g.player_perspectives) AS jj
+  JSON_EACH(g.player_perspectives) AS jj
   LEFT JOIN player_perspectives AS p ON p.id = jj.value
 GROUP BY
   g.id;
@@ -625,12 +637,12 @@ DROP VIEW IF EXISTS [v_simple_player_perspectives];
 CREATE VIEW [v_simple_player_perspectives] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'player_perspectives',
+  JSON_EACH.value AS 'player_perspectives',
   player_perspectives_table.name AS 'player_perspectives_name'
 FROM
   games AS 'games_table',
-  json_each(games_table.player_perspectives)
-  LEFT JOIN player_perspectives AS 'player_perspectives_table' ON player_perspectives_table.id = json_each.value
+  JSON_EACH(games_table.player_perspectives)
+  LEFT JOIN player_perspectives AS 'player_perspectives_table' ON player_perspectives_table.id = JSON_EACH.value
 ORDER BY
   games_table.id;
 
@@ -643,7 +655,7 @@ SELECT
   GROUP_CONCAT(gm.name, ', ') AS 'game_modes_name'
 FROM
   games AS 'g',
-  json_each(g.game_modes) AS jj
+  JSON_EACH(g.game_modes) AS jj
   JOIN game_modes AS gm ON gm.id = jj.value
 GROUP BY
   g.id;
@@ -653,12 +665,12 @@ DROP VIEW IF EXISTS [v_simple_game_modes];
 CREATE VIEW [v_simple_game_modes] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'game_modes',
+  JSON_EACH.value AS 'game_modes',
   game_modes_table.name AS 'game_modes_name'
 FROM
   games AS 'games_table',
-  json_each(games_table.game_modes)
-  JOIN game_modes AS 'game_modes_table' ON game_modes_table.id = json_each.value
+  JSON_EACH(games_table.game_modes)
+  JOIN game_modes AS 'game_modes_table' ON game_modes_table.id = JSON_EACH.value
 ORDER BY
   games_table.id;
 
@@ -668,10 +680,10 @@ CREATE VIEW [v_agr_game_engines] AS
 SELECT
   g.id AS 'id',
   g.game_engines AS 'game_engines',
-  GROUP_CONCAT(ge.name, ', ') as 'game_engines_name'
+  GROUP_CONCAT(ge.name, ', ') AS 'game_engines_name'
 FROM
   games AS g,
-  json_each(g.game_engines) as jj
+  JSON_EACH(g.game_engines) AS jj
   JOIN game_engines AS ge ON ge.id = jj.value
 GROUP BY
   g.id;
@@ -681,12 +693,12 @@ DROP VIEW IF EXISTS [v_simple_game_engines];
 CREATE VIEW [v_simple_game_engines] AS
 SELECT
   games_table.id AS 'id',
-  json_each.value AS 'game_engines',
+  JSON_EACH.value AS 'game_engines',
   game_engines_table.name AS 'game_engines_name'
 FROM
   games AS 'games_table',
-  json_each(games_table.game_engines)
-  JOIN game_engines AS 'game_engines_table' ON game_engines_table.id = json_each.value
+  JSON_EACH(games_table.game_engines)
+  JOIN game_engines AS 'game_engines_table' ON game_engines_table.id = JSON_EACH.value
 ORDER BY
   games_table.id;
 
@@ -722,15 +734,15 @@ SELECT
   IFNULL ([v_agr_game_engines].[game_engines_name], '') AS 'game_engines_name'
 FROM
   [games]
-  LEFT JOIN [v_simple_releases] ON [v_simple_releases].[id] = [games].[id]
+  LEFT JOIN [v_simple_releases] ON [games].[id] = [v_simple_releases].[id]
+  LEFT JOIN [platforms] ON [v_simple_releases].[platform] = [platforms].[id]
+  LEFT JOIN [platforms#category] ON [platforms#category].[value] = [platforms].[category]
   LEFT JOIN [collections] ON [collections].[id] = [games].[collection]
   LEFT JOIN [games#category] ON [games#category].[value] = [games].[category]
+  LEFT JOIN [franchises] ON [franchises].[id] = [games].[franchise]
   LEFT JOIN [v_agr_game_modes] ON [v_agr_game_modes].[id] = [games].[id]
   LEFT JOIN [v_agr_player_perspectives] ON [v_agr_player_perspectives].[id] = [games].[id]
   LEFT JOIN [v_agr_genres] ON [v_agr_genres].[id] = [games].[id]
-  LEFT JOIN [franchises] ON [franchises].[id] = [games].[franchise]
-  LEFT JOIN [platforms] ON [platforms].[id] = [v_simple_releases].[platform]
-  LEFT JOIN [platforms#category] ON [platforms#category].[value] = [platforms].[category]
   LEFT JOIN [v_agr_publishers] ON [v_agr_publishers].[id] = [games].[id]
   LEFT JOIN [v_agr_developers] ON [v_agr_developers].[id] = [games].[id]
   LEFT JOIN [v_agr_game_engines] ON [v_agr_game_engines].[id] = [games].[id];
@@ -743,16 +755,12 @@ SELECT
 FROM
   v_agr_all
 WHERE
-  platform in (
+  platform IN (
     SELECT
       id
-    from
+    FROM
       "platforms#selected"
   );
-
-CREATE INDEX IF NOT EXISTS [idx_alternative_names_game] ON [alternative_names]([game]);
-
-CREATE INDEX IF NOT EXISTS [idx_games_id] ON [games]([id]);
 
 CREATE INDEX IF NOT EXISTS [idx_age_rating#category_value] ON [age_rating#category]([value]);
 
@@ -792,20 +800,28 @@ CREATE INDEX IF NOT EXISTS [idx_game_localizations_id] ON [game_localizations]([
 
 CREATE INDEX IF NOT EXISTS [idx_game_localizations_platform] ON [game_localizations]([game]);
 
+CREATE INDEX IF NOT EXISTS [idx_games_id] ON [games]([id]);
+
 CREATE INDEX IF NOT EXISTS [idx_involved_companies_company] ON [involved_companies]([company]);
 
 CREATE INDEX IF NOT EXISTS [idx_involved_companies_developer] ON [involved_companies]([developer]);
+
+CREATE INDEX IF NOT EXISTS [idx_involved_companies_game] ON [involved_companies]([game]);
 
 CREATE INDEX IF NOT EXISTS [idx_involved_companies_id] ON [involved_companies]([id]);
 
 CREATE INDEX IF NOT EXISTS [idx_involved_companies_publisher] ON [involved_companies]([publisher]);
 
+CREATE INDEX IF NOT EXISTS [idx_involved_companies_id_pub_and_dev] ON [involved_companies]([id], [publisher], [developer]);
+
 CREATE INDEX IF NOT EXISTS [idx_release_dates_game] ON [release_dates]([game]);
 
 CREATE INDEX IF NOT EXISTS [idx_release_dates_id] ON [release_dates]([id]);
 
-CREATE INDEX IF NOT EXISTS [involved_companies_gameID] ON [involved_companies]([game]);
+CREATE INDEX IF NOT EXISTS [idx_platforms_id] ON [platforms]([id]);
 
-CREATE INDEX IF NOT EXISTS [release_dates_gameID] ON [release_dates]([game]);
+CREATE INDEX IF NOT EXISTS [idx_platforms_category] ON [platforms]([category]);
+
+CREATE INDEX IF NOT EXISTS [idx_platforms_id_and_category] ON [platforms]([id], [category]);
 
 /* No STAT tables available */
