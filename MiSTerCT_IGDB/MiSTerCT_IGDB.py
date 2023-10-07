@@ -1,5 +1,6 @@
 import os
 import click
+from timeit import default_timer as timer
 from core import (
     get_files_from_txt,
     get_data,
@@ -40,6 +41,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 def cli(source, output, platforms, db, region):
     """MiSTerCT_IGDB CLI"""
 
+    start_timer = timer()
     source_path = os.path.abspath(source)
     output_path = os.path.abspath(output)
     db_path = os.path.abspath(db)
@@ -64,7 +66,7 @@ def cli(source, output, platforms, db, region):
     results, found, not_found = search_game_name(files, df_names_off, df_names_alt)
     write_csv(output_path, results)
 
-    print_results(found, not_found)
+    print_results(found, not_found, start_timer)
 
     # for x in range(len(games)):
     #     genre = str(games[x]['genre'])
